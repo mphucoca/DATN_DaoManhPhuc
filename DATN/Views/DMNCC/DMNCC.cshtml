@@ -1,0 +1,374 @@
+﻿@{
+    ViewBag.Title = "DMNCC";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div ng-app="DMNCCApp" ng-controller="DMNCCController">
+
+    <div ng-show="!OtherMode">
+
+        @*<<<<<<<phần tìm kiếm thông tin*@
+        <div class="mb-3">
+            <!-- Hàng chứa tiêu đề và các nút -->
+            <div class="container-fluid bg-light">
+                <!-- Cột chứa tiêu đề -->
+                <div class="navbar-header ">
+                    @* MP_NOTE sửa tiêu đề danh mục *@
+                    <p class="text-secondary" style="margin-top: 20px;  " ng-click="ExpandSearch()">Quản lý danh mục thông tin nhà cung cấp</p>
+                </div>
+
+                <!-- Cột chứa các nút -->
+                <div class="nav navbar-nav navbar-right" style="margin: 10px;">
+                    <div class="action-icons">
+                        <!-- Refresh -->
+                        <button class="btn text-info" ng-click="Refresh()">
+                            <i class="fa fa-refresh fa-lg"></i>
+                        </button>
+                        <!-- Post -->
+                        <button type="button" class="btn text-info" ng-click="showAddModal()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <!-- Put -->
+                        <button class="btn text-info" ng-click="Edit()">
+                            <i class="fa fa-pencil-square fa-lg"></i>
+                        </button>
+                        <!-- Delete -->
+                        <button class="btn" style="color:red;" ng-click="DELETE_All_checked()">
+                            <i class="fa fa-trash fa-lg"></i>
+                        </button>
+                        @* MP_NOTE  *@
+                        <button class="btn text-info" ng-click="Group()">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @* Model tìm kiếm *@
+            <div ng-model="search">
+                @* Phần layout xử lý tìm kiếm *@
+                <div class="container-fluid search-div" style="height: 48px;">
+                    <div class="row">
+                        <div class="col-xs-12 full-width">
+                            <div class="input-group" style="height: 100%;">
+                                @* Model search.keyword *@
+                                <input ng-model="search.keyword" type="text" class="form-control input-field" style="border:none; height: 100%;" ng-keydown="handleKeydown($event)" placeholder=" Nhập thông tin tìm kiếm...">
+                                <span class="input-group-btn">
+
+                                    <button class="btn btn-dark text-white" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="!isExpandSearch" ng-click="ExpandSearch()">
+                                        <i class="fa-solid fa-caret-up"></i>
+                                    </button>
+
+
+                                    <button class="btn btn-dark text-white" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="isExpandSearch" ng-click="ExpandSearch()">
+                                        <i class="fa-solid fa-caret-down"></i>
+                                    </button>
+
+                                    <button class="btn btn-info text-white" style="background-color: #136b93; width: 46px; height: 46px;" ng-click="SEARCH(isExpandSearch)">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @* MP_NOTE Phần layout tìm kiếm mở rộng*@
+                @* ///////////////////////////////////// *@
+
+            <div class="container-fluid search-div-expand row" style="margin-top : 10px;" ng-show="isExpandSearch">
+                <div class="col-md-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <label class="me-2" style="min-width: 100px; font-weight: normal;">Mã NCC</label>
+                        <input type="text" class="form-control" ng-model="search.ma_ncc">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <label class="me-2" style="min-width: 100px; font-weight: normal;">Tên NCC</label>
+                        <input type="text" class="form-control" ng-model="search.ten_ncc">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <label class="me-2" style="min-width: 100px; font-weight: normal;">Địa chỉ</label>
+                        <input type="text" class="form-control" ng-model="search.dia_chi">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <label class="me-2" style="min-width: 100px; font-weight: normal;">Ghi chú</label>
+                        <input type="text" class="form-control" ng-model="search.ghi_chu">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <label class="me-2" style="min-width: 100px; font-weight: normal;">Điện thoại</label>
+                        <input type="text" class="form-control" ng-model="search.dien_thoai">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <label class="me-2" style="min-width: 100px; font-weight: normal;">Email</label>
+                        <input type="text" class="form-control" ng-model="search.email">
+                    </div>
+                </div>
+             
+            </div>
+
+
+
+            </div>
+        </div>
+        @*>>>>>>>>>phần tìm kiếm thông tin*@
+        <hr />
+
+        @*<<<<<<<<<<<<Phần xử lý hiển thị danh sách thông tin chính của các phiếu*@
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;" class="text-center align-middle">STT</th>
+                        <th style="width: 50px;" class="text-center align-middle"><input type="checkbox" ng-model="clickallcheckbox" ng-click="clickall()" /></th>
+                        <th style="width: 50px;" class="text-center align-middle">Sửa</th>
+                        <th style="width: 50px;" class="text-center align-middle">Xóa</th>
+
+                        <th class="text-center align-middle">Mã NCC</th>
+                        <th class="text-center align-middle">Tên NCC</th>
+                        <th class="text-center align-middle">Địa chỉ</th>
+                        <th class="text-center align-middle">Điện thoại</th>
+                        <th class="text-center align-middle">Email</th>
+                        <th class="text-center align-middle">Mã số thuế</th>
+                        <th class="text-center align-middle">Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in ds_main | filter:searchText" ng-class="{'selected-row': item.checked}" ng-dblclick="Detail(item)">
+                        <td class="text-center align-middle" ng-bind="$index+1"></td>
+                        <td class="text-center align-middle"><input type="checkbox" ng-model="item.checked" ng-click="click(item)" /></td>
+                        <td class="text-center align-middle" ng-click="Edit(item)"><i class="fas fa-edit"></i></td>
+                        <td class="text-center align-middle" ng-click="DELETE(item)"><i class="fas fa-trash-alt text-danger"></i></td>
+                        <td class="text-center align-middle">{{ item.ma_ncc }}</td>
+                        <td class="text-center align-middle">{{ item.ten_ncc }}</td>
+                        <td class="text-center align-middle">{{ item.dia_chi }}</td>
+                        <td class="text-center align-middle">{{ item.dien_thoai }}</td>
+                        <td class="text-center align-middle">{{ item.email }}</td>
+                        <td class="text-center align-middle">{{ item.ma_so_thue }}</td>
+                        <td class="text-center align-middle">{{ item.ghi_chu }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        @*>>>>>>>>>>>>>>Phần xử lý hiển thị danh sách thông tin chính của các phiếu*@
+
+    </div>
+
+
+
+    @* Giao diện thêm sửa <<<< *@
+    <!-- Modal Xác Nhận -->
+    <div class="modal" ng-show="isConfirmModalOpen">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" ng-click="closeConfirmModal()">&times;</button>
+                    <h4 class="modal-title">Xác Nhận</h4>
+                </div>
+                <div class="modal-body">
+                    <p>{{ confirmMessage }}</p>
+                    <p></p>
+                    <p></p>
+                    <p></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" ng-click="closeConfirmModal()">Hủy</button>
+                    <button type="button" class="btn btn-danger" ng-click="confirmAction()">Đồng Ý</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="OtherMode">
+        @*<<<<<<<phần tìm kiếm thông tin*@
+        <div class="mb-3">
+            <!-- Hàng chứa tiêu đề và các nút -->
+            <div class="container-fluid bg-light">
+                <!-- Cột chứa tiêu đề -->
+                <div class="navbar-header ">
+                    @* MP_NOTE sửa tiêu đề danh mục *@
+                    <p class="text-secondary" style="margin-top: 20px;  " ng-click="ExpandSearch()" ng-show="OtherMode">Quản lý thông tin danh mục nhà cung cấp</p>
+
+                </div>
+
+                <!-- Cột chứa các nút -->
+                <div class="nav navbar-nav navbar-right" style="margin: 10px;">
+                    <div class="action-icons">
+                        @* Reload dữ liệu *@
+                        <button class="btn text-info" ng-click="Refresh()">
+                            <i class="fa fa-refresh fa-lg"></i>
+                        </button>
+
+                        <!-- Put -->
+                        <button class="btn text-info" ng-click="Edit()" ng-show="!edit_mode && !add_mode">
+                            <i class="fa fa-pencil-square fa-lg"></i>
+                        </button>
+                        @* Lưu dữ liệu *@
+                        <button class="btn text-info" ng-click="Save()" ng-show="edit_mode||add_mode">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                        </button>
+                        @* MP_NOTE  *@
+                        @* Hủy sự thay đổi này *@
+                        <button class="btn text-info" style="color:red;" ng-click="CloseOtherMode()">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="container mt-3" ng-show="OtherMode">
+                <form>
+                    <div class="container-fluid search-div-expand row" style="margin-top : 10px;" ng-model="new_item">
+                        <div class="col-md-3 mb-2">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2" style="min-width: 100px; font-weight: normal;">Mã NCC</label>
+                                <input type="text" class="form-control" ng-model="new_item.ma_ncc" disabled>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2" style="min-width: 100px; font-weight: normal;">Tên NCC</label>
+                                <input type="text" class="form-control" ng-model="new_item.ten_ncc" ng-disabled="!edit_mode && !add_mode">
+
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2" style="min-width: 100px; font-weight: normal;">Địa chỉ</label>
+                                <input type="text" class="form-control" ng-model="new_item.dia_chi" ng-disabled="!edit_mode && !add_mode">
+
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2" style="min-width: 100px; font-weight: normal;">Điện thoại</label>
+                                <input type="tel" class="form-control" ng-model="new_item.dien_thoai" ng-disabled="!edit_mode && !add_mode">
+
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2" style="min-width: 100px; font-weight: normal;">Email</label>
+                                <input type="email" class="form-control" ng-model="new_item.email" ng-disabled="!edit_mode && !add_mode">
+
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2" style="min-width: 100px; font-weight: normal;">Mã số thuế</label>
+                                <input type="text" class="form-control" ng-model="new_item.ma_so_thue" ng-disabled="!edit_mode && !add_mode">
+
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2" style="min-width: 100px; font-weight: normal;">Ghi chú</label>
+                                <input type="text" class="form-control" ng-model="new_item.ghi_chu" ng-disabled="!edit_mode && !add_mode">
+
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        @*>>>>>>>>>phần tìm kiếm thông tin*@
+        <hr />
+    </div>
+
+
+    @* Giao diện thêm sửa >>>> *@
+</div>
+
+<style>
+    /* Cấu hình cơ bản cho Modal */
+    .modal {
+        display: block !important; /* Đảm bảo modal luôn hiển thị */
+        position: fixed !important; /* Cố định modal trên màn hình */
+        top: 0 !important; /* Đặt modal ở vị trí trên cùng */
+        left: 0 !important; /* Đặt modal ở vị trí bên trái */
+        width: 100% !important; /* Chiếm toàn bộ chiều rộng màn hình */
+        height: 100% !important; /* Chiếm toàn bộ chiều cao màn hình */
+        background-color: rgba(0, 0, 0, 0.5) !important; /* Nền tối mờ */
+        z-index: 9999 !important; /* Đảm bảo modal hiển thị lên trên các phần tử khác */
+        overflow: hidden; /* Ngăn cuộn khi modal mở */
+    }
+
+    /* Cấu hình phần Dialog (khung của modal) */
+    .modal-dialog {
+        margin: 100px auto; /* Căn giữa modal theo chiều dọc và ngang */
+        width: 400px; /* Chiều rộng của modal */
+        position: relative; /* Đảm bảo phần tử dialog được đặt cố định */
+    }
+
+    /* Cấu hình phần nội dung modal */
+    .modal-content {
+        background-color: white; /* Nền trắng cho nội dung modal */
+        padding: 20px; /* Padding để tạo không gian trong nội dung */
+        border-radius: 4px; /* Viền bo tròn cho các góc */
+        position: relative; /* Đảm bảo phần tử content không bị trôi */
+    }
+
+    /* Cấu hình phần đầu của modal */
+    .modal-header {
+        border-bottom: 1px solid #ddd; /* Viền dưới cho phần header */
+        font-size: 18px; /* Cỡ chữ cho tiêu đề */
+        padding-bottom: 10px; /* Padding dưới để tạo không gian */
+    }
+
+    /* Cấu hình phần footer của modal */
+    .modal-footer {
+        text-align: right; /* Căn phải cho các nút trong footer */
+    }
+
+    /* Nút đóng trong modal */
+    .close {
+        font-size: 30px; /* Cỡ chữ của dấu "x" đóng modal */
+        font-weight: bold;
+        color: #aaa; /* Màu sắc cho nút đóng */
+        cursor: pointer; /* Con trỏ chuột khi hover */
+    }
+
+        .close:hover, .close:focus {
+            color: black; /* Màu sắc khi hover vào nút đóng */
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    /* Cấu hình cho background mờ */
+    .modal-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5); /* Màu mờ đen */
+        z-index: 9998; /* Đảm bảo lớp này nằm dưới modal */
+    }
+
+    /* Khi modal mở, cho phép các phần tử bên ngoài modal không thể tương tác */
+    .modal-content {
+        pointer-events: all; /* Cho phép các sự kiện xảy ra trong modal */
+    }
+
+
+
+    .modal {
+        animation: fadeIn 0.3s ease-out; /* Thêm hiệu ứng fade-in */
+    }
+
+    /* Đảm bảo các phần tử bên trong modal có thể tương tác được */
+    .modal-dialog {
+        pointer-events: all;
+    }
+
+    /*Modal thêm mới*/
+
+</style>
+

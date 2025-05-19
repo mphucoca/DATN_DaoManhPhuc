@@ -1,0 +1,19 @@
+﻿@if (Session["UserName"] != null)
+{
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="@Url.Action("Logout", "LogInOut")"
+           class="btn btn-link navbar-btn"
+           data-bs-toggle="tooltip"
+           data-bs-placement="bottom"
+           title="@Session["FullName"]">
+            <i class="fas fa-user"  ></i> @Session["UserName"] - Đăng xuất
+        </a>
+    </div>
+}
+else
+{
+    <div>
+        @Html.ActionLink("Đăng nhập", "Login", "LogInOut", null, new { @class = "btn btn-link navbar-btn" })
+    </div>
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />

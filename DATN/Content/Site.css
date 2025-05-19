@@ -1,0 +1,244 @@
+﻿/* site.css */
+
+/* Đặt cấu trúc cho trang */
+html, body {
+    height: 100%; /* Đảm bảo chiều cao của body chiếm 100% */
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Chiều cao 100% của viewport */
+}
+
+.header {
+    height: 4vh; /* Chiếm 4% chiều cao màn hình */
+    background-color: #005E9C !important;
+    color: white;
+    padding: 20px;
+}
+
+.body-content {
+    flex-grow: 1; /* Chiếm phần còn lại của không gian */
+    background-color: #f4f7fb;
+    padding: 10px; /* Bỏ padding */
+    box-sizing: border-box;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background-color: #005E9C !important;
+    color: white !important;
+}
+
+.footer {
+    height: 5vh; /* Chiếm 5% chiều cao màn hình */
+    background-color: #005E9C;
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+/*<< Cấu hình css cho phần dropdown menu*/
+/* Thêm CSS cho dropdown */
+.navbar-nav .dropdown:hover .dropdown-menu {
+    display: block;
+    /* Đảm bảo dropdown menu xuất hiện khi hover */
+}
+
+.dropdown-menu {
+    background-color: #005E9C;
+    border: none;
+}
+
+    .dropdown-menu > li > a {
+        color: white;
+        padding: 10px 20px;
+    }
+
+        .dropdown-menu > li > a:hover {
+            background-color: #004080;
+            color: #fff;
+        }
+
+/* Tùy chỉnh thanh menu khi hover */
+.navbar-nav .dropdown {
+    position: relative;
+}
+
+.navbar-nav .dropdown-toggle::after {
+    content: " ▼";
+    font-size: 0.7em;
+}
+
+/*>> Cấu hình css cho phần dropdown menu*/
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header, .footer {
+        padding: 10px;
+    }
+
+    .body-content {
+        padding: 5% 2.5%; /* Thay đổi padding cho màn hình nhỏ hơn */
+    }
+}
+/* CSS của danh sách chính*/
+
+.table {
+    table-layout: fixed; /* Cố định chiều rộng các cột */
+    width: 100%; /* Chiều rộng 100% để bảng chiếm hết không gian */
+}
+
+    .table th, .table td {
+        word-wrap: break-word; /* Đảm bảo văn bản không bị tràn */
+        overflow: hidden;
+        text-overflow: ellipsis; /* Thêm dấu "..." nếu nội dung quá dài */
+    }
+
+.table-responsive {
+    overflow-x: auto; /* Cho phép cuộn ngang nếu bảng quá rộng */
+}
+/*<<<< Hiệu ứng cho grid*/
+
+*{
+    border-radius:0 !important;
+}
+.sys-order-0 {
+    background-color: #ffd580 !important;
+}
+.sys-order-1 {
+    background-color: #d4edda !important;
+}
+/* xanh lá nhạt */
+.sys-order-2 {
+    background-color: #fff3cd !important;
+}
+/* vàng nhạt */
+.sys-order-3 {
+    background-color: #e6e6fa !important;
+}
+/* đỏ nhạt */
+
+
+
+/*>>>>> Hiệu ứng cho grid*/
+
+    /* Đảm bảo box-sizing cho tất cả các phần tử */
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+.form-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.form-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.form-section {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.form-left {
+    width: 40%; /* Phần trái chiếm 40% */
+    padding-right: 20px;
+    text-align: right;
+}
+
+.form-right {
+    width: 60%; /* Phần phải chiếm 60% */
+}
+
+.control-label {
+    font-weight: bold;
+}
+
+.form-right input,
+.form-right select {
+    width: 100%; /* Đảm bảo input và select chiếm hết chiều rộng của phần phải */
+}
+
+    /* Đảm bảo các trường kiểm tra (checkbox) không bị lỗi kích thước */
+    .form-right input[type="checkbox"] {
+        width: auto;
+    }
+
+/* Hiệu ứng khi checkbox được chọn */
+.selected-row {
+    background-color: #e0f7fa !important; /* Màu nền khi dòng được chọn */
+    transition: background-color 0.3s ease !important; /* Hiệu ứng chuyển màu nền */
+}
+
+    .selected-row:hover {
+        background-color: #b2ebf2 !important; /* Màu nền khi hover lên dòng đã chọn */
+    }
+tr:hover {
+    background-color: #f1f1f1 !important; /* Màu nền khi hover lên dòng */
+    cursor: pointer; /* Hiển thị con trỏ chuột khi hover */
+    transition: background-color 0.3s ease !important; /* Hiệu ứng chuyển màu nền */
+}
+/* Khi checkbox được chọn và hover */
+.selected-row:hover {
+    background-color: #b2ebf2 !important; /* Màu nền khi hover lên dòng đã chọn */
+    transition: background-color 0.3s ease !important;
+}
+ 
+
+ /*Xử lý giao diện modal custom*/
+/* Custom3 modal kích thước 70% và canh giữa */
+.custom3_modal {
+    position: fixed; /* quan trọng */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 1050;
+    background-color: rgba(0,0,0,0.5); /* làm mờ nền nếu muốn */
+}
+
+.custom3_modal_dialog {
+    width: 70vw !important;
+    height: 70vh !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+.custom3_modal .modal-dialog {
+    margin: auto !important;
+    pointer-events: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+}
+
+.custom3_modal_content {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.custom3_modal_body {
+    flex: 1 !important;
+    overflow-y: auto !important;
+}
