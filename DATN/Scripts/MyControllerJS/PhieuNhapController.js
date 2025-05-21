@@ -616,4 +616,39 @@ app.controller('PhieuNhapController', function ($scope, $http) {
 
    
     $scope.LoadComboBox();
+    $scope.PrintPhieuNhap = function (so_ct) {
+        var url = '/api/PhieuNhapAPI/ExportPdf_iText?so_ct=' + encodeURIComponent(so_ct);
+
+        // Mở tab mới
+        var printWindow = window.open('', '_blank');
+
+        // Gọi API để lấy dữ liệu PDF
+        fetch(url)
+            .then(response => response.blob())
+            .then(blob => {
+                var blobUrl = URL.createObjectURL(blob);
+
+                // Gán nội dung iframe PDF và script tự động in
+                printWindow.document.write(`
+                <html>
+                <head>
+                    <title>In phiếu nhập</title>
+                </head>
+                <body style="margin:0">
+                    <iframe src="${blobUrl}" type="application/pdf" style="width:100%; height:100vh;" id="pdfFrame"></iframe>
+                    <script>
+                        const frame = document.getElementById('pdfFrame');
+                        frame.onload = function() {
+                            frame.contentWindow.focus();
+                            frame.contentWindow.print();
+                        };
+                    </script>
+                </body>
+                </html>
+            `);
+                printWindow.document.close();
+            });
+    };
+
+
 });

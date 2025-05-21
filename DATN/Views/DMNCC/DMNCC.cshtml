@@ -20,23 +20,23 @@
                 <div class="nav navbar-nav navbar-right" style="margin: 10px;">
                     <div class="action-icons">
                         <!-- Refresh -->
-                        <button class="btn text-info" ng-click="Refresh()">
+                        <button class="btn text-info" ng-click="Refresh()" title="Làm mới">
                             <i class="fa fa-refresh fa-lg"></i>
                         </button>
                         <!-- Post -->
-                        <button type="button" class="btn text-info" ng-click="showAddModal()">
+                        <button type="button" class="btn text-info" ng-click="showAddModal()" title="Thêm">
                             <i class="fas fa-plus"></i>
                         </button>
                         <!-- Put -->
-                        <button class="btn text-info" ng-click="Edit()">
+                        <button class="btn text-info" ng-click="Edit()" title="Sửa">
                             <i class="fa fa-pencil-square fa-lg"></i>
                         </button>
                         <!-- Delete -->
-                        <button class="btn" style="color:red;" ng-click="DELETE_All_checked()">
+                        <button class="btn" style="color:red;" ng-click="DELETE_All_checked()" title="Xóa">
                             <i class="fa fa-trash fa-lg"></i>
                         </button>
                         @* MP_NOTE  *@
-                        <button class="btn text-info" ng-click="Group()">
+                        <button class="btn text-info" ng-click="Group()" title="Nhóm">
                             <i class="fa-solid fa-layer-group"></i>
                         </button>
                     </div>
@@ -53,16 +53,16 @@
                                 <input ng-model="search.keyword" type="text" class="form-control input-field" style="border:none; height: 100%;" ng-keydown="handleKeydown($event)" placeholder=" Nhập thông tin tìm kiếm...">
                                 <span class="input-group-btn">
 
-                                    <button class="btn btn-dark text-white" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="!isExpandSearch" ng-click="ExpandSearch()">
+                                    <button class="btn btn-dark text-white" title="Mở rộng" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="!isExpandSearch" ng-click="ExpandSearch()">
                                         <i class="fa-solid fa-caret-up"></i>
                                     </button>
 
 
-                                    <button class="btn btn-dark text-white" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="isExpandSearch" ng-click="ExpandSearch()">
+                                    <button class="btn btn-dark text-white" title="Thu gọn" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="isExpandSearch" ng-click="ExpandSearch()">
                                         <i class="fa-solid fa-caret-down"></i>
                                     </button>
 
-                                    <button class="btn btn-info text-white" style="background-color: #136b93; width: 46px; height: 46px;" ng-click="SEARCH(isExpandSearch)">
+                                    <button class="btn btn-info text-white" title="Tìm kiếm" style="background-color: #136b93; width: 46px; height: 46px;" ng-click="SEARCH(isExpandSearch)">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </button>
                                 </span>
@@ -143,8 +143,8 @@
                     <tr ng-repeat="item in ds_main | filter:searchText" ng-class="{'selected-row': item.checked}" ng-dblclick="Detail(item)">
                         <td class="text-center align-middle" ng-bind="$index+1"></td>
                         <td class="text-center align-middle"><input type="checkbox" ng-model="item.checked" ng-click="click(item)" /></td>
-                        <td class="text-center align-middle" ng-click="Edit(item)"><i class="fas fa-edit"></i></td>
-                        <td class="text-center align-middle" ng-click="DELETE(item)"><i class="fas fa-trash-alt text-danger"></i></td>
+                        <td class="text-center align-middle" ng-click="Edit(item)"><i class="fas fa-edit" title="Sửa"></i></td>
+                        <td class="text-center align-middle" ng-click="DELETE(item)"><i class="fas fa-trash-alt text-danger" title="Xóa"></i></td>
                         <td class="text-center align-middle">{{ item.ma_ncc }}</td>
                         <td class="text-center align-middle">{{ item.ten_ncc }}</td>
                         <td class="text-center align-middle">{{ item.dia_chi }}</td>
@@ -202,20 +202,20 @@
                     <div class="action-icons">
                         @* Reload dữ liệu *@
                         <button class="btn text-info" ng-click="Refresh()">
-                            <i class="fa fa-refresh fa-lg"></i>
+                            <i class="fa fa-refresh fa-lg" title="Làm mới"></i>
                         </button>
 
                         <!-- Put -->
                         <button class="btn text-info" ng-click="Edit()" ng-show="!edit_mode && !add_mode">
-                            <i class="fa fa-pencil-square fa-lg"></i>
+                            <i class="fa fa-pencil-square fa-lg" title="Sửa"></i>
                         </button>
                         @* Lưu dữ liệu *@
-                        <button class="btn text-info" ng-click="Save()" ng-show="edit_mode||add_mode">
+                        <button class="btn text-info" ng-click="Save()" title="Lưu" ng-show="edit_mode||add_mode">
                             <i class="fa-solid fa-floppy-disk"></i>
                         </button>
                         @* MP_NOTE  *@
                         @* Hủy sự thay đổi này *@
-                        <button class="btn text-info" style="color:red;" ng-click="CloseOtherMode()">
+                        <button class="btn text-info" style="color:red;" title="Đóng" ng-click="CloseOtherMode()">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>

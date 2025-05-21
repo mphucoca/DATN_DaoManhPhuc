@@ -22,12 +22,12 @@
                 <div class="nav navbar-nav navbar-right" style="margin: 10px;">
                     <div class="action-icons">
                         <!-- Refresh -->
-                        <button class="btn text-info" ng-click="Refresh()">
+                        <button class="btn text-info" ng-click="Refresh()" title="Làm mới">
                             <i class="fa fa-refresh fa-lg"></i>
                         </button>
 
                         @* MP_NOTE  *@
-                        <button class="btn text-info" ng-click="export()">
+                        <button class="btn text-info" ng-click="export()" title="Xuất Excel">
                             <i class="fa-solid fa-arrow-up-from-bracket"></i>
                         </button>
 
@@ -47,16 +47,16 @@
                                 <input ng-model="search.keyword" type="text" class="form-control input-field" style="border:none; height: 100%;" ng-keydown="handleKeydown($event)" placeholder=" Nhập thông tin tìm kiếm...">
                                 <span class="input-group-btn">
 
-                                    <button class="btn btn-dark text-white" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="!isExpandSearch" ng-click="ExpandSearch()">
+                                    <button class="btn btn-dark text-white" title="Mở rộng" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="!isExpandSearch" ng-click="ExpandSearch()">
                                         <i class="fa-solid fa-caret-up"></i>
                                     </button>
 
 
-                                    <button class="btn btn-dark text-white" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="isExpandSearch" ng-click="ExpandSearch()">
+                                    <button class="btn btn-dark text-white" title="Thu gọn" style="background-color: lightgray; width: 46px; height: 46px;" ng-show="isExpandSearch" ng-click="ExpandSearch()">
                                         <i class="fa-solid fa-caret-down"></i>
                                     </button>
 
-                                    <button class="btn btn-info text-white" style="background-color: #136b93; width: 46px; height: 46px;" ng-click="SEARCH(isExpandSearch)">
+                                    <button class="btn btn-info text-white" title="Tìm kiếm" style="background-color: #136b93; width: 46px; height: 46px;" ng-click="SEARCH(isExpandSearch)">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </button>
                                 </span>
@@ -76,7 +76,7 @@
                     <label style="min-width: 80px; font-weight: normal; white-space: nowrap;">Vật tư</label>
                     <input type="text" ng-model="search.ma_vt_list" disabled
                            style="flex-grow: 1; max-width: 500px; padding: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;">
-                    <button ng-click="openSelectVTModal()"
+                    <button ng-click="openSelectVTModal()" title="Chọn vật tư"
                             style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background-color: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
@@ -134,7 +134,7 @@
                     <label style="min-width: 80px; font-weight: normal; white-space: nowrap;">Kho</label>
                     <input type="text" ng-model="search.ma_kho_list" disabled
                            style="flex-grow: 1; max-width: 500px; padding: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;">
-                    <button ng-click="openSelectKhoModal()"
+                    <button ng-click="openSelectKhoModal()" title="Chọn kho"
                             style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background-color: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>

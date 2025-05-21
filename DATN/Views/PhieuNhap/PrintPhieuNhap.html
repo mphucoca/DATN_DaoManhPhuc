@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>In phiếu nhập</title>
+</head>
+<body style="margin:0">
+    <iframe id="pdfFrame" style="width:100%;height:100vh;" frameborder="0"></iframe>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const so_ct = urlParams.get('so_ct');
+
+        const pdfUrl = '/api/PhieuNhapAPI/ExportPdf_iText?so_ct=' + encodeURIComponent(so_ct);
+        const iframe = document.getElementById('pdfFrame');
+        iframe.src = pdfUrl;
+
+        iframe.onload = function () {
+            setTimeout(() => {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            }, 1000); // Chờ PDF load xong mới in
+        };
+    </script>
+</body>
+</html>

@@ -1,10 +1,10 @@
 ﻿@{
-    ViewBag.Title = "BCPhieuNhap";
+    ViewBag.Title = "BCPhieuXuat";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 
-<div ng-app="BCPhieuNhapApp" ng-controller="BCPhieuNhapController">
+<div ng-app="BCPhieuXuatApp" ng-controller="BCPhieuXuatController">
 
     <div ng-show="!OtherMode">
 
@@ -15,7 +15,7 @@
                 <!-- Cột chứa tiêu đề -->
                 <div class="navbar-header ">
                     @* MP_NOTE sửa tiêu đề danh mục *@
-                    <p class="text-secondary" style="margin-top: 20px;  " ng-click="ExpandSearch()">Báo cáo tổng hợp phiếu nhập</p>
+                    <p class="text-secondary" style="margin-top: 20px;  " ng-click="ExpandSearch()">Báo cáo tổng hợp phiếu xuất</p>
                 </div>
 
                 <!-- Cột chứa các nút -->
@@ -56,7 +56,7 @@
                                         <i class="fa-solid fa-caret-down"></i>
                                     </button>
 
-                                    <button class="btn btn-info text-white" title="Tìm kiếm"  style="background-color: #136b93; width: 46px; height: 46px;" ng-click="SEARCH(isExpandSearch)">
+                                    <button class="btn btn-info text-white" title="Tìm kiếm" style="background-color: #136b93; width: 46px; height: 46px;" ng-click="SEARCH(isExpandSearch)">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </button>
                                 </span>
@@ -67,142 +67,142 @@
                 @* MP_NOTE Phần layout tìm kiếm mở rộng*@
                 @* ///////////////////////////////////// *@
 
-            <div class="container-fluid search-div-expand row" style="margin-top : 10px;" ng-show="isExpandSearch">
+                <div class="container-fluid search-div-expand row" style="margin-top : 10px;" ng-show="isExpandSearch">
 
 
-                <!-- Button để mở Modal chọn vật tư -->
+                    <!-- Button để mở Modal chọn vật tư -->
 
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label style="min-width: 80px; font-weight: normal; white-space: nowrap;">Vật tư</label>
-                    <input type="text" ng-model="search.ma_vt_list" disabled
-                           style="flex-grow: 1; max-width: 500px; padding: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;">
-                    <button ng-click="openSelectVTModal()" title="Chọn vật tư"
-                            style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background-color: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
-                <!-- Modal chọn vật tư (Được mở rộng kích thước) -->
-                <div class="modal custom3_modal" ng-show="isSelectVTModalOpen">
-                    <div class="modal-dialog custom3_modal_dialog">
-                        <div class="modal-content custom3_modal_content">
-                            <div class="modal-header">
-                                <button type="button" class="close" ng-click="closeSelectVTModal()">&times;</button>
-                                <h4 class="modal-title">Chọn Vật Tư</h4>
-                            </div>
-                            <div class="modal-body custom3_modal_body">
-                                <!-- Form tìm kiếm -->
-                                <div class="mb-3">
-                                    <input type="text" ng-model="searchKeyword" class="form-control" placeholder="Tìm kiếm theo mã hoặc tên vật tư..." />
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="min-width: 80px; font-weight: normal; white-space: nowrap;">Vật tư</label>
+                        <input type="text" ng-model="search.ma_vt_list" disabled
+                               style="flex-grow: 1; max-width: 500px; padding: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;">
+                        <button ng-click="openSelectVTModal()" title="Chọn vật tư"
+                                style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background-color: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                    <!-- Modal chọn vật tư (Được mở rộng kích thước) -->
+                    <div class="modal custom3_modal" ng-show="isSelectVTModalOpen">
+                        <div class="modal-dialog custom3_modal_dialog">
+                            <div class="modal-content custom3_modal_content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" ng-click="closeSelectVTModal()">&times;</button>
+                                    <h4 class="modal-title">Chọn Vật Tư</h4>
                                 </div>
+                                <div class="modal-body custom3_modal_body">
+                                    <!-- Form tìm kiếm -->
+                                    <div class="mb-3">
+                                        <input type="text" ng-model="searchKeyword" class="form-control" placeholder="Tìm kiếm theo mã hoặc tên vật tư..." />
+                                    </div>
 
-                                <!-- Bảng hiển thị vật tư -->
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center align-middle" style="width: 50px;">
-                                                    <input type="checkbox" ng-model="selectAll" ng-click="toggleSelectAll()">
-                                                </th>
-                                                <th class="text-center align-middle">Mã vật tư</th>
-                                                <th class="text-center align-middle">Tên vật tư</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr ng-repeat="vt in ds_ma_vt | filter:searchKeyword" ng-click="tich(vt)">
-                                                <td class="text-center align-middle">
-                                                    <input type="checkbox" ng-model="vt.selected">
-                                                </td>
-                                                <td class="text-center align-middle">{{ vt.ma_vt }}</td>
-                                                <td class="text-center align-middle">{{ vt.ten_vt }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <!-- Bảng hiển thị vật tư -->
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center align-middle" style="width: 50px;">
+                                                        <input type="checkbox" ng-model="selectAll" ng-click="toggleSelectAll()">
+                                                    </th>
+                                                    <th class="text-center align-middle">Mã vật tư</th>
+                                                    <th class="text-center align-middle">Tên vật tư</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="vt in ds_ma_vt | filter:searchKeyword" ng-click="tich(vt)">
+                                                    <td class="text-center align-middle">
+                                                        <input type="checkbox" ng-model="vt.selected">
+                                                    </td>
+                                                    <td class="text-center align-middle">{{ vt.ma_vt }}</td>
+                                                    <td class="text-center align-middle">{{ vt.ten_vt }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" ng-click="closeSelectVTModal()">Đóng</button>
-                                <button type="button" class="btn btn-primary" ng-click="confirmSelection()">Xác nhận</button>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" ng-click="closeSelectVTModal()">Đóng</button>
+                                    <button type="button" class="btn btn-primary" ng-click="confirmSelection()">Xác nhận</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
 
 
-                @*  MODAL hiển thị lookup *@
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label style="min-width: 80px; font-weight: normal; white-space: nowrap;">Kho</label>
-                    <input type="text" ng-model="search.ma_kho_list" disabled
-                           style="flex-grow: 1; max-width: 500px; padding: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;">
-                    <button ng-click="openSelectKhoModal()" title="Chọn kho"
-                            style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background-color: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
+                    @*  MODAL hiển thị lookup *@
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label style="min-width: 80px; font-weight: normal; white-space: nowrap;">Kho</label>
+                        <input type="text" ng-model="search.ma_kho_list" disabled
+                               style="flex-grow: 1; max-width: 500px; padding: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;">
+                        <button ng-click="openSelectKhoModal()" title="Chọn kho"
+                                style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background-color: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
 
 
 
 
-                <!-- Modal chọn vật tư (Được mở rộng kích thước) -->
-                <div class="modal custom3_modal" ng-show="isSelectKhoModalOpen">
-                    <div class="modal-dialog custom3_modal_dialog">
-                        <div class="modal-content custom3_modal_content">
-                            <div class="modal-header">
-                                <button type="button" class="close" ng-click="closeSelectKhoModal()">&times;</button>
-                                <h4 class="modal-title">Chọn kho</h4>
-                            </div>
-                            <div class="modal-body custom3_modal_body">
-                                <!-- Form tìm kiếm -->
-                                <div class="mb-3">
-                                    <input type="text" ng-model="searchKeyword_kho" class="form-control" placeholder="Tìm kiếm theo mã kho hoặc tên kho..." />
+                    <!-- Modal chọn vật tư (Được mở rộng kích thước) -->
+                    <div class="modal custom3_modal" ng-show="isSelectKhoModalOpen">
+                        <div class="modal-dialog custom3_modal_dialog">
+                            <div class="modal-content custom3_modal_content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" ng-click="closeSelectKhoModal()">&times;</button>
+                                    <h4 class="modal-title">Chọn kho</h4>
                                 </div>
+                                <div class="modal-body custom3_modal_body">
+                                    <!-- Form tìm kiếm -->
+                                    <div class="mb-3">
+                                        <input type="text" ng-model="searchKeyword_kho" class="form-control" placeholder="Tìm kiếm theo mã kho hoặc tên kho..." />
+                                    </div>
 
-                                <!-- Bảng hiển thị vật tư -->
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center align-middle" style="width: 50px;">
-                                                    <input type="checkbox" ng-model="selectAll_kho" ng-click="toggleSelectAll_kho()">
-                                                </th>
-                                                <th class="text-center align-middle">Mã kho</th>
-                                                <th class="text-center align-middle">Tên kho</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr ng-repeat="kho in ds_ma_kho | filter:searchKeyword_kho" ng-click="tich(kho)">
-                                                <td class="text-center align-middle">
-                                                    <input type="checkbox" ng-model="kho.selected">
-                                                </td>
-                                                <td class="text-center align-middle">{{ kho.ma_kho }}</td>
-                                                <td class="text-center align-middle">{{ kho.ten_kho }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <!-- Bảng hiển thị vật tư -->
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center align-middle" style="width: 50px;">
+                                                        <input type="checkbox" ng-model="selectAll_kho" ng-click="toggleSelectAll_kho()">
+                                                    </th>
+                                                    <th class="text-center align-middle">Mã kho</th>
+                                                    <th class="text-center align-middle">Tên kho</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="kho in ds_ma_kho | filter:searchKeyword_kho" ng-click="tich(kho)">
+                                                    <td class="text-center align-middle">
+                                                        <input type="checkbox" ng-model="kho.selected">
+                                                    </td>
+                                                    <td class="text-center align-middle">{{ kho.ma_kho }}</td>
+                                                    <td class="text-center align-middle">{{ kho.ten_kho }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" ng-click="closeSelectKhoModal()">Đóng</button>
-                                <button type="button" class="btn btn-primary" ng-click="confirmSelection_kho()">Xác nhận</button>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" ng-click="closeSelectKhoModal()">Đóng</button>
+                                    <button type="button" class="btn btn-primary" ng-click="confirmSelection_kho()">Xác nhận</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-3 mb-2">
-                    <div class="d-flex align-items-center">
-                        <label class="me-2" style="min-width: 80px; font-weight: normal;">Từ ngày</label>
-                        <input type="date" class="form-control" ng-model="search.tu_ngay">
+                    <div class="col-md-3 mb-2">
+                        <div class="d-flex align-items-center">
+                            <label class="me-2" style="min-width: 80px; font-weight: normal;">Từ ngày</label>
+                            <input type="date" class="form-control" ng-model="search.tu_ngay">
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3 mb-2">
-                    <div class="d-flex align-items-center">
-                        <label class="me-2" style="min-width: 80px; font-weight: normal;">Đến ngày</label>
-                        <input type="date" class="form-control" ng-model="search.den_ngay">
+                    <div class="col-md-3 mb-2">
+                        <div class="d-flex align-items-center">
+                            <label class="me-2" style="min-width: 80px; font-weight: normal;">Đến ngày</label>
+                            <input type="date" class="form-control" ng-model="search.den_ngay">
+                        </div>
                     </div>
-                </div>
 
-            </div>
+                </div>
 
 
 
@@ -219,16 +219,16 @@
                         <th style="width: 50px;" class="text-center align-middle">STT</th>
                         <th style="width: 50px;" class="text-center align-middle">Số CT</th>
                         <th style="width: 50px;" class="text-center align-middle">Ngày CT</th>
-                        <th style="width: 50px;" class="text-center align-middle">Mã NCC</th>
-                        <th style="width: 50px;" class="text-center align-middle">Tên NCC</th>
+                        <th style="width: 50px;" class="text-center align-middle">Mã KH</th>
+                        <th style="width: 50px;" class="text-center align-middle">Tên KH</th>
                         <th style="width: 50px;" class="text-center align-middle">Mã VT</th>
                         <th style="width: 50px;" class="text-center align-middle">Tên VT</th>
                         <th style="width: 50px;" class="text-center align-middle">Mã kho</th>
                         <th style="width: 50px;" class="text-center align-middle">Tên kho</th>
                         <th style="width: 50px;" class="text-center align-middle">Mã ĐVT</th>
                         <th style="width: 50px;" class="text-center align-middle">Tên ĐVT</th>
-                        <th style="width: 50px;" class="text-center align-middle">Số lượng nhập</th>
-                        <th style="width: 50px;" class="text-center align-middle">Đơn giá nhập</th>
+                        <th style="width: 50px;" class="text-center align-middle">Số lượng xuất</th>
+                        <th style="width: 50px;" class="text-center align-middle">Đơn giá xuất</th>
                         <th style="width: 50px;" class="text-center align-middle">Thành tiền</th>
                     </tr>
                 </thead>
@@ -244,18 +244,18 @@
                         <td class="text-center align-middle">{{ item.stt }}</td>
                         <td class="text-center align-middle">{{ item.so_ct }}</td>
                         <td class="text-center align-middle">  {{ item.sys_order != 5 ? (item.ngay_ct | date:'dd/MM/yyyy') : '' }}</td>
-                        <td class="text-center align-middle">{{ item.ma_ncc }}</td>
-                        <td class="text-center align-middle">{{ item.ten_ncc }}</td>
+                        <td class="text-center align-middle">{{ item.ma_kh }}</td>
+                        <td class="text-center align-middle">{{ item.ten_kh }}</td>
                         <td class="text-center align-middle">{{ item.ma_vt }}</td>
                         <td class="text-center align-middle">{{ item.ten_vt }}</td>
                         <td class="text-center align-middle">{{ item.ma_kho }}</td>
                         <td class="text-center align-middle">{{ item.ten_kho }}</td>
                         <td class="text-center align-middle">{{ item.ma_dvt }}</td>
                         <td class="text-center align-middle">{{ item.ten_dvt }}</td>
-                        <td class="text-center align-middle">{{ item.so_luong_nhap }}</td>
-                        <td class="text-center align-middle">{{ item.don_gia_nhap }}</td>
-                        <td class="text-center align-middle">{{ item.thanh_tien }}</td> 
-                        
+                        <td class="text-center align-middle">{{ item.so_luong_xuat }}</td>
+                        <td class="text-center align-middle">{{ item.don_gia_xuat }}</td>
+                        <td class="text-center align-middle">{{ item.thanh_tien }}</td>
+
                     </tr>
                 </tbody>
             </table>

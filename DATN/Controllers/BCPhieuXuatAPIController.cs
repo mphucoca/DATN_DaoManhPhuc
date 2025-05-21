@@ -15,7 +15,7 @@ using ApplicationDbContext = WH.DataContext.ApplicationDbContext;
 
 namespace WH.Controllers
 {
-    public class BCPhieuNhapAPIController : ApiController
+    public class BCPhieuXuatAPIController : ApiController
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
@@ -25,10 +25,10 @@ namespace WH.Controllers
         private static string _searchKeyword;
         private static DateTime? _tu_ngay;
         private static DateTime? _den_ngay;
-        private static List<BCPhieuNhap> data = null;
+        private static List<BCPhieuXuat> data = null;
         [HttpGet]
-        [Route("api/BCPhieuNhapAPI/SearchPhieuNhap")]
-        public IHttpActionResult SearchPhieuNhap(string ma_vt_list, string ma_kho_list, string keyword = "", string tu_ngay = "", string den_ngay = "")
+        [Route("api/BCPhieuXuatAPI/SearchPhieuXuat")]
+        public IHttpActionResult SearchPhieuXuat(string ma_vt_list, string ma_kho_list, string keyword = "", string tu_ngay = "", string den_ngay = "")
         {
             try
             {
@@ -56,8 +56,8 @@ namespace WH.Controllers
                 };
 
                 string jsonStr = JsonConvert.SerializeObject(inputJson);
-                var sql = "SELECT * FROM bc_tonghop_phieu_nhap(@p0::json)";
-                data = db.Database.SqlQuery<BCPhieuNhap>(sql, jsonStr).ToList();
+                var sql = "SELECT * FROM bc_tonghop_phieu_xuat(@p0::json)";
+                data = db.Database.SqlQuery<BCPhieuXuat>(sql, jsonStr).ToList();
 
                 return Ok(data);
             }
@@ -67,8 +67,8 @@ namespace WH.Controllers
             }
         }
         [HttpGet]
-        [Route("api/BCPhieuNhapAPI/ExportPhieuNhap")]
-        public HttpResponseMessage ExportPhieuNhap()
+        [Route("api/BCPhieuXuatAPI/ExportPhieuXuat")]
+        public HttpResponseMessage ExportPhieuXuat()
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
@@ -79,11 +79,11 @@ namespace WH.Controllers
 
             using (var package = new ExcelPackage())
             {
-                var ws = package.Workbook.Worksheets.Add("PhieuNhap");
+                var ws = package.Workbook.Worksheets.Add("PhieuXuat");
 
                 // Danh sách tiêu đề
                 string[] headers = {
-            "STT", "Số CT", "Ngày CT", "Mã NCC", "Tên NCC", "Mã VT", "Tên VT",
+            "STT", "Số CT", "Ngày CT", "Mã KH", "Tên KH", "Mã VT", "Tên VT",
             "Mã kho", "Tên kho", "Mã ĐVT", "Tên ĐVT", "Số lượng nhập",
             "Đơn giá nhập", "Thành tiền"
         };
@@ -102,16 +102,16 @@ namespace WH.Controllers
                     ws.Cells[row, 1].Value = item.stt;
                     ws.Cells[row, 2].Value = item.so_ct;
                     ws.Cells[row, 3].Value = item.ngay_ct.ToString("dd/MM/yyyy");
-                    ws.Cells[row, 4].Value = item.ma_ncc;
-                    ws.Cells[row, 5].Value = item.ten_ncc;
+                    ws.Cells[row, 4].Value = item.ma_kh;
+                    ws.Cells[row, 5].Value = item.ten_kh;
                     ws.Cells[row, 6].Value = item.ma_vt;
                     ws.Cells[row, 7].Value = item.ten_vt;
                     ws.Cells[row, 8].Value = item.ma_kho;
                     ws.Cells[row, 9].Value = item.ten_kho;
                     ws.Cells[row, 10].Value = item.ma_dvt;
                     ws.Cells[row, 11].Value = item.ten_dvt;
-                    ws.Cells[row, 12].Value = item.so_luong_nhap;
-                    ws.Cells[row, 13].Value = item.don_gia_nhap;
+                    ws.Cells[row, 12].Value = item.so_luong_xuat;
+                    ws.Cells[row, 13].Value = item.don_gia_xuat;
                     ws.Cells[row, 14].Value = item.thanh_tien;
 
                     // Định dạng số
@@ -165,7 +165,7 @@ namespace WH.Controllers
                 };
                 result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
                 {
-                    FileName = "PhieuNhap.xlsx"
+                    FileName = "PhieuXuat.xlsx"
                 };
                 result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 

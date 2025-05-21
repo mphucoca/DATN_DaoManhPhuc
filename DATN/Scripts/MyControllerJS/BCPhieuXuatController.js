@@ -1,6 +1,6 @@
-﻿var app = angular.module('BCPhieuNhapApp', []);
+﻿var app = angular.module('BCPhieuXuatApp', []);
 
-app.controller('BCPhieuNhapController', function ($scope, $http) {
+app.controller('BCPhieuXuatController', function ($scope, $http) {
     // Phần 1 khởi tạo các biến cần thiết
     ///////////////////// KHAI BÁO CÁC MẶC ĐỊNH <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     // Khởi tạo danh sách và các biến cho phiếu
@@ -136,7 +136,7 @@ app.controller('BCPhieuNhapController', function ($scope, $http) {
 
 
     ///////////////
-    //$http.get('/api/BCPhieuNhapAPI/GetPhieuNhap')
+    //$http.get('/api/BCPhieuXuatAPI/GetPhieuXuat')
     //    .then(function (response) {
     //        $scope.ds_main = response.data;
             
@@ -150,14 +150,14 @@ app.controller('BCPhieuNhapController', function ($scope, $http) {
     $scope.export = function () {
         $http({
             method: 'GET',
-            url: '/api/BCPhieuNhapAPI/ExportPhieuNhap',
+            url: '/api/BCPhieuXuatAPI/ExportPhieuXuat',
             responseType: 'arraybuffer'
         }).then(function (response) {
             var blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             var downloadUrl = URL.createObjectURL(blob);
             var a = document.createElement("a");
             a.href = downloadUrl;
-            a.download = "PhieuNhap.xlsx";
+            a.download = "PhieuXuat.xlsx";
             document.body.appendChild(a);
             a.click();
         });
@@ -193,7 +193,7 @@ app.controller('BCPhieuNhapController', function ($scope, $http) {
         $scope.search.ma_kho_list = selectedKhoCodes;
     
         // Gọi API tìm kiếm
-        $http.get('/api/BCPhieuNhapAPI/SearchPhieuNhap', {
+        $http.get('/api/BCPhieuXuatAPI/SearchPhieuXuat', {
             params: {
                 ma_vt_list: $scope.search.ma_vt_list,
                 ma_kho_list: $scope.search.ma_kho_list,
