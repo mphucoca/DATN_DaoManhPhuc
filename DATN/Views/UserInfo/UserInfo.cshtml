@@ -36,8 +36,8 @@
                             <i class="fa fa-trash fa-lg"></i>
                         </button>
                         @* MP_NOTE  *@
-                        <button class="btn text-info" ng-click="Group()">
-                            <i class="fa-solid fa-layer-group"></i>
+                        <button class="btn btn-sm btn-outline-info" ng-show="role==0" title="Lịch sử chỉnh sửa" ng-click="ShowLichSu(new_item)">
+                            <i class="fa fa-history"></i>
                         </button>
                     </div>
                 </div>
@@ -228,6 +228,9 @@
                         @* Hủy sự thay đổi này *@
                         <button class="btn text-info" style="color:red;" ng-click="CloseOtherMode()">
                             <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" ng-show="role==0" title="Lịch sử chỉnh sửa" ng-click="ShowLichSuCT(new_item)">
+                            <i class="fa fa-history"></i>
                         </button>
                     </div>
                 </div>

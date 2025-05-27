@@ -2,6 +2,20 @@
 
 app.controller('PhieuXuatController', function ($scope, $http) {
     // Phần 1 khởi tạo các biến cần thiết
+    //<<<<<<<<<<<<<<<<<<<< Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
+    $scope.username = '';
+    $scope.role = '';
+
+    $http.get('/api/UserInfoAPI/GetSessionInfo')
+        .then(function (response) {
+            if (response.data.success) {
+                $scope.username = response.data.username;
+                $scope.role = response.data.role;
+            }
+        }, function (error) {
+
+        })
+    //>>>>>>>>>>>>>>>>>>>>>>Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
      ///////////////////// KHAI BÁO CÁC MẶC ĐỊNH <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     // Khởi tạo danh sách và các biến cho phiếu
     $scope.ds_main = [];
@@ -30,16 +44,11 @@ app.controller('PhieuXuatController', function ($scope, $http) {
     $scope.ds_trangthai = [
         { ma_trangthai: 0, ten_trangthai: 'Chờ duyệt' },
         { ma_trangthai: 1, ten_trangthai: 'Đã duyệt' },
-        { ma_trangthai: 2, ten_trangthai: 'Đã nhập kho' },
+        { ma_trangthai: 2, ten_trangthai: 'Đã hoàn thành' },
         { ma_trangthai: 3, ten_trangthai: 'Đã hủy' }
     ];
 
-    $scope.ds_trangthai = [
-        { ma_trangthai: 0, ten_trangthai: 'Chờ duyệt' },
-        { ma_trangthai: 1, ten_trangthai: 'Đã duyệt' },
-        { ma_trangthai: 2, ten_trangthai: 'Đã nhập kho' },
-        { ma_trangthai: 3, ten_trangthai: 'Đã hủy' }
-    ];
+    
     $scope.ds_tt_thanh_toan = [
         { ma: 0, ten: 'Chọn giá trị ' },
         { ma: 1, ten: 'Thanh toán ngay' },
@@ -670,5 +679,125 @@ app.controller('PhieuXuatController', function ($scope, $http) {
             `);
                 printWindow.document.close();
             });
+    };
+    // phần lịch sử chỉnh sửa
+    // phần lịch sử chỉnh sửa
+    $scope.isHistoryModalOpen = false;
+    $scope.historyLogs = [];
+    $scope.selectedRecord = null;
+
+    function isSameJson(jsonStr1, jsonStr2) {
+        try {
+            let obj1 = JSON.parse(jsonStr1);
+            let obj2 = JSON.parse(jsonStr2);
+            return angular.equals(obj1, obj2);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    $scope.ShowLichSu = function (item) {
+        $scope.new_item = null;
+
+        // Gọi API lấy lịch sử log
+        $http.get('/api/LOG7API/GetAuditLogByTable/')
+            .then(function (response) {
+                // Lọc bỏ các bản ghi UPDATE mà old_data và new_data giống nhau
+                $scope.historyLogs = response.data.filter(function (log) {
+                    if (log.operation === 'UPDATE') {
+                        return !isSameJson(log.old_data, log.new_data);
+                    }
+                    return true;
+                });
+                $scope.isHistoryModalOpen = true;
+            }, function (error) {
+
+            });
+    };
+    $scope.ShowLichSuCT = function (item) {
+        $http.get('/api/LOG7API/GetAuditLogByTableCT/')
+            .then(function (response) {
+                $scope.historyLogs = response.data.filter(function (log) {
+                    try {
+                        // Parse primary_key_data để lấy ma_kho
+                        const primaryKeyObj = JSON.parse(log.primary_key_data || '{}');
+                        const logMaKho = primaryKeyObj.so_ct || null;
+
+                        // So sánh ma_kho
+                        const isSameMaKho = logMaKho === item.so_ct;
+
+                        if (!isSameMaKho) return false;
+
+                        // Nếu là UPDATE, loại bỏ nếu old_data và new_data giống nhau
+                        if (log.operation === 'UPDATE') {
+                            return !isSameJson(log.old_data, log.new_data);
+                        }
+
+                        return true;
+                    } catch (e) {
+
+                        return false;
+                    }
+                });
+
+                $scope.isHistoryModalOpen = true;
+            }, function (error) {
+            });
+    };
+
+
+    $scope.closeHistoryModal = function () {
+        $scope.isHistoryModalOpen = false;
+        $scope.historyLogs = [];
+        $scope.selectedRecord = null;
+    };
+
+    $scope.parseJson = function (jsonString) {
+        try {
+            return JSON.parse(jsonString || "{}");
+        } catch (e) {
+            return {};
+        }
+    };
+
+    $scope.getDiffClass = function (oldValue, newValue) {
+        if (oldValue !== newValue) {
+            return "table-warning";
+        }
+        return "";
+    };
+
+    // phần lịch sử chỉnh sửa
+
+
+    ////<<< Phần duyệt trạng thái phiếu
+    $scope.ChangeInfo = function (noidung, new_item) {
+        if (!new_item || !new_item.so_ct) {
+            alert("Không tìm thấy số chứng từ.");
+            return;
+        }
+
+        if (noidung === 'HoanThanh') {
+            // Xác nhận nhập kho đã xử lý riêng
+            $http.post('/api/PhieuXuatAPI/XacNhanPhieuXuat?so_ct=' + new_item.so_ct)
+                .then(function (response) {
+                    $scope.new_item.trang_thai = 2;
+                    alert("Thành công. Phiếu xuất đã được xác nhận và cập nhật tồn kho.");
+                }, function (error) {
+
+                });
+        } else {
+            // Các trạng thái khác: Duyệt (1) hoặc Hủy (3)
+            let new_status = (noidung === 'Duyet') ? 1 : (noidung === 'Huy' ? 3 : null);
+            if (new_status !== null) {
+                $http.post('/api/PhieuXuatAPI/CapNhatTrangThai?so_ct=' + new_item.so_ct + '&trang_thai=' + new_status)
+                    .then(function (response) {
+                        $scope.new_item.trang_thai = new_status;
+                        alert("Cập nhật trạng thái phiếu thành công.");
+                    }, function (error) {
+
+                    });
+            }
+        }
     };
 });

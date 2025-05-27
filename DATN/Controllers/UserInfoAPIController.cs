@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web.Http;
 using WH.DataContext;
+using WH.Helpers;
 using WH.Models;
 using ApplicationDbContext = WH.DataContext.ApplicationDbContext;
 namespace WH.Controllers
@@ -13,6 +15,26 @@ namespace WH.Controllers
     public class UserInfoAPIController : ApiController
     {
         private ApplicationDbContext db = new ApplicationDbContext();
+        private AuditHelper auditHelper;
+
+        public UserInfoAPIController()
+        {
+            auditHelper = new AuditHelper(db);
+        }
+        [HttpGet]
+        [Route("api/UserInfoAPI/GetSessionInfo")]
+        public IHttpActionResult GetSessionInfo()
+        {
+            var (username, role) = auditHelper.GetSessionInfo();
+
+            return Ok(new
+            {
+                success = true,
+                username,
+                role
+            });
+        }
+
 
         public IHttpActionResult Get()
         {
@@ -82,7 +104,7 @@ namespace WH.Controllers
 
         [HttpPost]
         [Route("api/UserInfoAPI/DeleteAll")]
-        public IHttpActionResult DeleteAll([FromBody] List<UserInfoClass> list)
+        public async Task<IHttpActionResult> DeleteAll([FromBody] List<UserInfoClass> list)
         {
             if (list == null || !list.Any())
                 return BadRequest("Danh sách rỗng");
@@ -92,15 +114,27 @@ namespace WH.Controllers
                 var _userinfo = db.UserInfoObj.FirstOrDefault(p => p.id == item.id.ToString());
                 if (_userinfo != null)
                 {
+                    var primaryKeyData = new { id = _userinfo.id };
+
+                    // Ghi log trước khi xóa
+                    await auditHelper.SaveAuditLogAsync(
+                        tableName: "userinfo",
+                        operation: "DELETE",
+                        primaryKeyData: primaryKeyData,
+                        oldData: _userinfo,
+                        newData: null
+                    );
+
                     db.UserInfoObj.Remove(_userinfo);
                 }
             }
-            db.SaveChanges();
+            await db.SaveChangesAsync();
             return Ok("Đã xóa các tài khoản được chọn");
         }
+
         [HttpPost]
         [Route("api/UserInfoAPI/SaveAdd")]
-        public IHttpActionResult SaveAdd(JObject data)
+        public async Task<IHttpActionResult> SaveAdd(JObject data)
         {
             try
             {
@@ -109,7 +143,6 @@ namespace WH.Controllers
                 if (userInfo == null)
                     return BadRequest("Dữ liệu không hợp lệ");
 
-                // Kiểm tra tên đăng nhập đã tồn tại
                 if (db.UserInfoObj.Any(u => u.username == userInfo.username))
                 {
                     return Ok(new
@@ -119,7 +152,6 @@ namespace WH.Controllers
                     });
                 }
 
-                // Sinh ID tự động (dạng số nhưng lưu dưới dạng chuỗi)
                 var lastUser = db.UserInfoObj
                     .AsEnumerable()
                     .Where(u => int.TryParse(u.id, out _))
@@ -127,9 +159,19 @@ namespace WH.Controllers
                     .Select(u => u.id)
                     .FirstOrDefault();
 
-                userInfo.id = lastUser == null ? "0" : (int.Parse(lastUser) + 1).ToString(); 
+                userInfo.id = lastUser == null ? "0" : (int.Parse(lastUser) + 1).ToString();
                 db.UserInfoObj.Add(userInfo);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
+
+                // Ghi log INSERT
+                var primaryKeyData = new { id = userInfo.id };
+                await auditHelper.SaveAuditLogAsync(
+                    tableName: "userinfo",
+                    operation: "INSERT",
+                    primaryKeyData: primaryKeyData,
+                    oldData: null,
+                    newData: userInfo
+                );
 
                 return Ok(new
                 {
@@ -142,9 +184,10 @@ namespace WH.Controllers
                 return InternalServerError(ex);
             }
         }
+
         [HttpPut]
         [Route("api/UserInfoAPI/SaveEdit")]
-        public IHttpActionResult SaveEdit(JObject data)
+        public async Task<IHttpActionResult> SaveEdit(JObject data)
         {
             try
             {
@@ -153,12 +196,10 @@ namespace WH.Controllers
                 if (userInfo == null || string.IsNullOrEmpty(userInfo.id))
                     return BadRequest("Dữ liệu không hợp lệ");
 
-                // Tìm bản ghi cũ trong DB
                 var existingUser = db.UserInfoObj.FirstOrDefault(u => u.id == userInfo.id);
                 if (existingUser == null)
                     return NotFound();
 
-                // Kiểm tra tên đăng nhập đã tồn tại (ngoại trừ bản ghi đang chỉnh sửa)
                 if (db.UserInfoObj.Any(u => u.username == userInfo.username && u.id != userInfo.id))
                 {
                     return Ok(new
@@ -167,6 +208,18 @@ namespace WH.Controllers
                         message = "Tên đăng nhập đã tồn tại."
                     });
                 }
+
+                // Lưu dữ liệu cũ để log
+                var oldData = new UserInfoClass
+                {
+                    id = existingUser.id,
+                    username = existingUser.username,
+                    fullname = existingUser.fullname,
+                    password = existingUser.password,
+                    email = existingUser.email,
+                    role = existingUser.role,
+                    trangthai = existingUser.trangthai
+                };
 
                 // Cập nhật thông tin
                 existingUser.username = userInfo.username;
@@ -177,7 +230,17 @@ namespace WH.Controllers
                 existingUser.trangthai = userInfo.trangthai;
 
                 db.Entry(existingUser).State = EntityState.Modified;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
+
+                // Ghi log UPDATE
+                var primaryKeyData = new { id = userInfo.id };
+                await auditHelper.SaveAuditLogAsync(
+                    tableName: "userinfo",
+                    operation: "UPDATE",
+                    primaryKeyData: primaryKeyData,
+                    oldData: oldData,
+                    newData: existingUser
+                );
 
                 return Ok(new
                 {
@@ -190,6 +253,7 @@ namespace WH.Controllers
                 return InternalServerError(ex);
             }
         }
+
 
 
 

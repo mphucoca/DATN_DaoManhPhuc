@@ -2,6 +2,20 @@
 
 app.controller('BCPhieuNhapController', function ($scope, $http) {
     // Phần 1 khởi tạo các biến cần thiết
+    //<<<<<<<<<<<<<<<<<<<< Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
+    $scope.username = '';
+    $scope.role = '';
+
+    $http.get('/api/UserInfoAPI/GetSessionInfo')
+        .then(function (response) {
+            if (response.data.success) {
+                $scope.username = response.data.username;
+                $scope.role = response.data.role;
+            }
+        }, function (error) {
+
+        })
+    //>>>>>>>>>>>>>>>>>>>>>>Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
     ///////////////////// KHAI BÁO CÁC MẶC ĐỊNH <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     // Khởi tạo danh sách và các biến cho phiếu
     $scope.ds_main = [];

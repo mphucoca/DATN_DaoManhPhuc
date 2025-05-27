@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Http;
 using WH.DataContext;
+using WH.Helpers;
 using WH.Models;
 using ApplicationDbContext = WH.DataContext.ApplicationDbContext;
 
@@ -14,7 +16,12 @@ namespace WH.Controllers
     public class LoaiVatTuAPIController : ApiController
     {
         private ApplicationDbContext db = new ApplicationDbContext();
-
+  
+        private AuditHelper auditHelper;
+        public LoaiVatTuAPIController()
+        {
+            auditHelper = new AuditHelper(db);
+        }
         public IHttpActionResult Get()
         {
             var query = @"SELECT * FROM loai_vat_tu ORDER BY ma_loai_vt ASC;";
@@ -89,7 +96,7 @@ namespace WH.Controllers
 
         [HttpPost]
         [Route("api/LoaiVatTuAPI/DeleteAll")]
-        public IHttpActionResult DeleteAll([FromBody] List<LoaiVatTuClass> list)
+        public async Task<IHttpActionResult> DeleteAll([FromBody] List<LoaiVatTuClass> list)
         {
             if (list == null || !list.Any())
                 return BadRequest("Danh sách rỗng");
@@ -99,16 +106,29 @@ namespace WH.Controllers
                 var obj = db.LoaiVatTuObj.FirstOrDefault(p => p.ma_loai_vt == item.ma_loai_vt);
                 if (obj != null)
                 {
+                    var primaryKeyData = new { ma_loai_vt = obj.ma_loai_vt };
+
+                    // Ghi log trước khi xóa
+                    await auditHelper.SaveAuditLogAsync(
+                        tableName: "loai_vat_tu",
+                        operation: "DELETE",
+                        primaryKeyData: primaryKeyData,
+                        oldData: obj,
+                        newData: null
+                    );
+
                     db.LoaiVatTuObj.Remove(obj);
                 }
             }
-            db.SaveChanges();
+
+            await db.SaveChangesAsync();
             return Ok("Đã xóa các loại vật tư được chọn");
         }
 
+
         [HttpPost]
         [Route("api/LoaiVatTuAPI/SaveAdd")]
-        public IHttpActionResult SaveAdd(JObject data)
+        public async Task<IHttpActionResult> SaveAdd(JObject data)
         {
             try
             {
@@ -123,7 +143,18 @@ namespace WH.Controllers
                 }
 
                 db.LoaiVatTuObj.Add(obj);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
+
+                var primaryKeyData = new { ma_loai_vt = obj.ma_loai_vt };
+
+                // Ghi log INSERT
+                await auditHelper.SaveAuditLogAsync(
+                    tableName: "loai_vat_tu",
+                    operation: "INSERT",
+                    primaryKeyData: primaryKeyData,
+                    oldData: null,
+                    newData: obj
+                );
 
                 return Ok(new { success = true, result = obj });
             }
@@ -132,10 +163,9 @@ namespace WH.Controllers
                 return Ok(new { success = false, message = ex.ToString() });
             }
         }
-
         [HttpPut]
         [Route("api/LoaiVatTuAPI/SaveEdit")]
-        public IHttpActionResult SaveEdit(JObject data)
+        public async Task<IHttpActionResult> SaveEdit(JObject data)
         {
             try
             {
@@ -148,12 +178,32 @@ namespace WH.Controllers
                 if (existingObj == null)
                     return NotFound();
 
+                // Lưu dữ liệu cũ để log
+                var oldData = new LoaiVatTuClass
+                {
+                    ma_loai_vt = existingObj.ma_loai_vt,
+                    ten_loai_vt = existingObj.ten_loai_vt,
+                    mo_ta = existingObj.mo_ta,
+                    trangthai = existingObj.trangthai
+                };
+
                 existingObj.ten_loai_vt = obj.ten_loai_vt;
                 existingObj.mo_ta = obj.mo_ta;
                 existingObj.trangthai = obj.trangthai;
 
                 db.Entry(existingObj).State = EntityState.Modified;
-                db.SaveChanges();
+                await db.SaveChangesAsync();
+
+                var primaryKeyData = new { ma_loai_vt = obj.ma_loai_vt };
+
+                // Ghi log UPDATE
+                await auditHelper.SaveAuditLogAsync(
+                    tableName: "loai_vat_tu",
+                    operation: "UPDATE",
+                    primaryKeyData: primaryKeyData,
+                    oldData: oldData,
+                    newData: existingObj
+                );
 
                 return Ok(new { success = true, result = existingObj });
             }
@@ -162,5 +212,58 @@ namespace WH.Controllers
                 return InternalServerError(ex);
             }
         }
+        [HttpGet]
+        [Route("api/LOG5API/GetAuditLogByTable")]
+        public IHttpActionResult GetAuditLogByTable()
+        {
+
+            var query = @"
+        SELECT 
+            a.id AS id,
+            a.table_name AS table_name,
+            a.operation AS operation,
+            a.primary_key_data AS primary_key_data,
+            a.old_data AS old_data,
+            a.new_data AS new_data,
+            a.changed_by AS changed_by,
+            a.changed_at AS changed_at,
+            b.username AS username
+        FROM audit_log a
+        LEFT JOIN userinfo b ON a.changed_by = b.id
+        WHERE a.table_name = 'loai_vat_tu'
+        ORDER BY a.changed_at DESC;
+    ";
+
+            var result = db.Database.SqlQuery<AuditLogView>(query).ToList();
+
+            return Ok(result);
+        }
+        [HttpGet]
+        [Route("api/LOG5API/GetAuditLogByTableCT")]
+        public IHttpActionResult GetAuditLogByTableCT()
+        {
+
+            var query = @"
+        SELECT 
+            a.id AS id,
+            a.table_name AS table_name,
+            a.operation AS operation,
+            a.primary_key_data AS primary_key_data,
+            a.old_data AS old_data,
+            a.new_data AS new_data,
+            a.changed_by AS changed_by,
+            a.changed_at AS changed_at,
+            b.username AS username
+        FROM audit_log a
+        LEFT JOIN userinfo b ON a.changed_by = b.id
+        WHERE a.table_name = 'loai_vat_tu'
+        ORDER BY a.changed_at DESC;
+    ";
+
+            var result = db.Database.SqlQuery<AuditLogView>(query).ToList();
+
+            return Ok(result);
+        }
+
     }
 }

@@ -242,3 +242,118 @@ tr:hover {
     flex: 1 !important;
     overflow-y: auto !important;
 }
+/*================ DASHBOARD STYLE ================*/
+
+/* Container chung cho tất cả các dashboard */
+.dashboard-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+    gap: 20px !important;
+    padding: 10px !important;
+}
+
+/* Mỗi khối dashboard là một card */
+.dashboard-card {
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 15px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+    .dashboard-card:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+
+/* Header cho mỗi dashboard */
+.dashboard-header {
+    background-color: #005E9C !important;
+    color: white !important;
+    padding: 12px 16px !important;
+    font-size: 1.2em !important;
+    font-weight: bold !important;
+}
+
+/* Phần thân hiển thị biểu đồ hoặc dữ liệu */
+.dashboard-body {
+    padding: 20px !important;
+    flex-grow: 1 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+    /* Canvas hoặc bảng dữ liệu nằm trong body */
+    .dashboard-body canvas,
+    .dashboard-body table {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+/* Responsive fix nếu container quá nhỏ */
+@media (max-width: 480px) {
+    .dashboard-body {
+        padding: 10px !important;
+    }
+
+    .dashboard-header {
+        font-size: 1em !important;
+    }
+}
+
+/* Màu sắc dashboard khác nhau (nếu muốn) */
+.dashboard-info {
+    border-top: 4px solid #17a2b8 !important; /* xanh dương nhạt */
+}
+
+.dashboard-warning {
+    border-top: 4px solid #ffc107 !important; /* vàng */
+}
+
+.dashboard-success {
+    border-top: 4px solid #28a745 !important; /* xanh lá */
+}
+
+.dashboard-danger {
+    border-top: 4px solid #dc3545 !important; /* đỏ */
+}
+
+.dashboard-primary {
+    border-top: 4px solid #007bff !important; /* xanh navy */
+}
+.modal-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0,0,0,0.7) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 1000 !important;
+}
+
+.modal-content {
+    position: relative !important;
+    background: #fff !important;
+    padding: 20px !important;
+    border-radius: 8px !important;
+    width: 90%;
+    height: 90%;
+    overflow: auto !important;
+}
+
+.close-btn {
+    position: absolute !important;
+    top: 8px !important;
+    right: 12px !important;
+    font-size: 28px !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
+}

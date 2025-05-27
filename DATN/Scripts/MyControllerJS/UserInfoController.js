@@ -5,7 +5,20 @@ app.controller('UserInfoController', function ($scope, $http) {
     ///////////////////// KHAI BÁO CÁC MẶC ĐỊNH <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     // Khởi tạo danh sách và các biến cho phiếu
     $scope.ds_main = [];
+    //<<<<<<<<<<<<<<<<<<<< Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
+    $scope.username = '';
+    $scope.role = '';
 
+    $http.get('/api/UserInfoAPI/GetSessionInfo')
+        .then(function (response) {
+            if (response.data.success) {
+                $scope.username = response.data.username;
+                $scope.role = response.data.role; 
+            }
+        }, function (error) {
+           
+        })
+    //>>>>>>>>>>>>>>>>>>>>>>Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
     $scope.OtherMode = false;  // khi thêm hoặc sẽ mở ra một màn hình khác
     $scope.showConfirmModal = function (message, callback) {
         $scope.confirmMessage = message;  // Cập nhật nội dung thông báo

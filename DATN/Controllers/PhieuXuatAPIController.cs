@@ -20,14 +20,20 @@ using iText.IO.Font;
 using System.Windows;
 using iText.Layout.Properties;
 using iText.Kernel.Colors;
-
+using WH.Helpers;
+using System.Threading.Tasks;
 
 namespace WH.Controllers
 {
     public class PhieuXuatAPIController : ApiController
     {
         private ApplicationDbContext db = new ApplicationDbContext();
+        private AuditHelper auditHelper;
 
+        public PhieuXuatAPIController()
+        {
+            auditHelper = new AuditHelper(db);
+        }
         // GET all PhieuXuat
         public IHttpActionResult Get()
         {
@@ -70,7 +76,7 @@ namespace WH.Controllers
             var ctPhieuXuatList = db.Database.SqlQuery<ChiTietPhieuXuatViewClass>(query, so_ct).ToList();
             return Ok(ctPhieuXuatList);
         }
-
+       
         // SEARCH with filters
         [HttpPost]
         [Route("api/PhieuXuatAPI/SEARCH")]
@@ -118,7 +124,7 @@ namespace WH.Controllers
         // DELETE selected PhieuXuat
         [HttpPost]
         [Route("api/PhieuXuatAPI/DeleteAll")]
-        public IHttpActionResult DeleteAll([FromBody] List<PhieuXuatClass> list)
+        public async Task<IHttpActionResult> DeleteAll([FromBody] List<PhieuXuatClass> list)
         {
             if (list == null || !list.Any())
                 return BadRequest("Danh sách rỗng");
@@ -128,17 +134,25 @@ namespace WH.Controllers
                 var phieu = db.PhieuXuatObj.FirstOrDefault(p => p.so_ct == item.so_ct);
                 if (phieu != null)
                 {
+                    var primaryKeyData = new { so_ct = phieu.so_ct };
+                    await auditHelper.SaveAuditLogAsync(
+                        tableName: "phieu_xuat",
+                        operation: "DELETE",
+                        primaryKeyData: primaryKeyData,
+                        oldData: phieu,
+                        newData: null
+                    );
                     db.PhieuXuatObj.Remove(phieu);
                 }
             }
-            db.SaveChanges();
+            await db.SaveChangesAsync();
             return Ok("Đã xóa các phiếu được chọn");
         }
 
         // POST Save All ChiTiet PhieuXuat
         [HttpPost]
         [Route("api/PhieuXuatAPI/SaveAll")]
-        public IHttpActionResult SaveAll(List<ChiTietPhieuXuatClass> list)
+        public async Task<IHttpActionResult> SaveAll(List<ChiTietPhieuXuatClass> list)
         {
             try
             {
@@ -147,17 +161,49 @@ namespace WH.Controllers
 
                 var so_ct = list.First().so_ct;
 
-                // Xóa các bản ghi cũ theo so_ct
+                // Bước 1: Lấy các bản ghi cũ theo so_ct
                 var oldItems = db.ChiTietPhieuXuatObj.Where(x => x.so_ct == so_ct).ToList();
-                db.ChiTietPhieuXuatObj.RemoveRange(oldItems);
-                db.SaveChanges();
 
-                // Thêm mới các bản ghi
-                foreach (var item in list)
+                if (!oldItems.Any())
                 {
-                    db.ChiTietPhieuXuatObj.Add(item);
+                    // Nếu không có bản ghi cũ, log là INSERT từng dòng
+                    foreach (var item in list)
+                    {
+                        db.ChiTietPhieuXuatObj.Add(item);
+
+                        await auditHelper.SaveAuditLogAsync(
+                            tableName: "ct_phieu_xuat",
+                            operation: "INSERT",
+                            primaryKeyData: new { so_ct = item.so_ct, ma_vt = item.ma_vt, ma_kho = item.ma_kho, ma_dvt = item.ma_dvt },
+                            oldData: null,
+                            newData: item
+                        );
+                    }
                 }
-                db.SaveChanges();
+                else
+                {
+                    // Bước 2: Xóa các bản ghi cũ
+                    db.ChiTietPhieuXuatObj.RemoveRange(oldItems);
+                    await db.SaveChangesAsync();
+
+                    // Bước 3: Ghi lại log sửa (UPDATE) từng dòng
+                    foreach (var item in list)
+                    {
+                        var old = oldItems.FirstOrDefault(x => x.ma_vt == item.ma_vt && x.ma_kho == item.ma_kho && x.ma_dvt == item.ma_dvt);
+
+                        await auditHelper.SaveAuditLogAsync(
+                            tableName: "ct_phieu_xuat",
+                            operation: "UPDATE",
+                            primaryKeyData: new { so_ct = item.so_ct, ma_vt = item.ma_vt, ma_kho = item.ma_kho, ma_dvt = item.ma_dvt },
+                            oldData: old,
+                            newData: item
+                        );
+
+                        db.ChiTietPhieuXuatObj.Add(item);
+                    }
+                }
+
+                await db.SaveChangesAsync();
 
                 return Ok(new { success = true, message = "Lưu thành công" });
             }
@@ -170,7 +216,7 @@ namespace WH.Controllers
         // POST Save new PhieuXuat
         [HttpPost]
         [Route("api/PhieuXuatAPI/SaveAdd")]
-        public IHttpActionResult SaveAdd(JObject data)
+        public async Task<IHttpActionResult> SaveAdd(JObject data)
         {
             try
             {
@@ -184,7 +230,17 @@ namespace WH.Controllers
                 }
 
                 db.PhieuXuatObj.Add(phieu);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
+
+                // Ghi log audit - INSERT
+                var primaryKeyData = new { so_ct = phieu.so_ct };
+                await auditHelper.SaveAuditLogAsync(
+                    tableName: "phieu_xuat",
+                    operation: "INSERT",
+                    primaryKeyData: primaryKeyData,
+                    oldData: null,
+                    newData: phieu
+                );
 
                 return Ok(new { success = true, result = phieu });
             }
@@ -194,10 +250,10 @@ namespace WH.Controllers
             }
         }
 
-        // PUT update existing PhieuXuat
+
         [HttpPut]
         [Route("api/PhieuXuatAPI/SaveEdit")]
-        public IHttpActionResult SaveEdit(JObject data)
+        public async Task<IHttpActionResult> SaveEdit(JObject data)
         {
             try
             {
@@ -211,6 +267,27 @@ namespace WH.Controllers
                     return Ok(new { success = false, message = "Phiếu xuất không tồn tại." });
                 }
 
+                // Ghi lại dữ liệu cũ trước khi thay đổi
+                var oldData = new PhieuXuatClass
+                {
+                    so_ct = existing.so_ct,
+                    ngay_ct = existing.ngay_ct,
+                    dien_giai = existing.dien_giai,
+                    trang_thai = existing.trang_thai,
+                    bien_so_xe = existing.bien_so_xe,
+                    ngay_van_chuyen = existing.ngay_van_chuyen,
+                    tt_thanhtoan = existing.tt_thanhtoan,
+                    chietkhau = existing.chietkhau,
+                    ma_so_thue = existing.ma_so_thue,
+                    thue = existing.thue,
+                    tong_thanh_toan = existing.tong_thanh_toan,
+                    tong_chiet_khau = existing.tong_chiet_khau,
+                    tong_thue = existing.tong_thue,
+                    nguoi_giao = existing.nguoi_giao,
+                    dia_diem_giao = existing.dia_diem_giao
+                };
+
+                // Cập nhật thông tin
                 existing.ngay_ct = phieu.ngay_ct;
                 existing.dien_giai = phieu.dien_giai;
                 existing.trang_thai = phieu.trang_thai;
@@ -227,7 +304,18 @@ namespace WH.Controllers
                 existing.dia_diem_giao = phieu.dia_diem_giao;
 
                 db.Entry(existing).State = EntityState.Modified;
-                db.SaveChanges();
+
+                // Ghi log audit - UPDATE
+                var primaryKeyData = new { so_ct = phieu.so_ct };
+                await auditHelper.SaveAuditLogAsync(
+                    tableName: "phieu_xuat",
+                    operation: "UPDATE",
+                    primaryKeyData: primaryKeyData,
+                    oldData: oldData,
+                    newData: phieu
+                );
+
+                await db.SaveChangesAsync();
 
                 return Ok(new { success = true, result = existing });
             }
@@ -236,6 +324,7 @@ namespace WH.Controllers
                 return Ok(new { success = false, message = ex.Message });
             }
         }
+
         [HttpGet]
         [Route("api/phieuxuat/tao_soct")]
         public IHttpActionResult TaoSoChungTu()
@@ -280,6 +369,7 @@ namespace WH.Controllers
             }
             catch (Exception ex)
             {
+                
                 return Ok(0); // Trong trường hợp lỗi cũng trả về 0
             }
         }
@@ -533,6 +623,96 @@ namespace WH.Controllers
                 return result;
             }
         }
+        [HttpPost]
+        [Route("api/PhieuXuatAPI/CapNhatTrangThai")]
+        public IHttpActionResult CapNhatTrangThai(string so_ct, int trang_thai)
+        {
+            try
+            {
+                var phieu = db.PhieuXuatObj.SingleOrDefault(p => p.so_ct == so_ct);
+                if (phieu == null)
+                    return NotFound();
+
+                phieu.trang_thai = trang_thai;
+                db.SaveChanges();
+
+                return Ok(new { success = true, message = "Cập nhật trạng thái thành công." });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(new Exception("Lỗi khi cập nhật trạng thái: " + ex.Message));
+            }
+        }
+        [HttpPost]
+        [Route("api/PhieuXuatAPI/XacNhanPhieuXuat")]
+        public IHttpActionResult XacNhanPhieuNhap(string so_ct)
+        {
+            try
+            {
+                // Gọi hàm PostgreSQL process_phieu_nhap
+                var query = "SELECT process_phieu_xuat(@p0)";
+                db.Database.ExecuteSqlCommand(query, so_ct);
+
+                return Ok(new { success = true, message = "Xác nhận phiếu xuất thành công." });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(new Exception("Đã xảy ra lỗi khi xác nhận phiếu nhập: " + ex.Message));
+            }
+        }
+        [HttpGet]
+        [Route("api/LOG7API/GetAuditLogByTable")]
+        public IHttpActionResult GetAuditLogByTable()
+        {
+
+            var query = @"
+        SELECT 
+            a.id AS id,
+            a.table_name AS table_name,
+            a.operation AS operation,
+            a.primary_key_data AS primary_key_data,
+            a.old_data AS old_data,
+            a.new_data AS new_data,
+            a.changed_by AS changed_by,
+            a.changed_at AS changed_at,
+            b.username AS username
+        FROM audit_log a
+        LEFT JOIN userinfo b ON a.changed_by = b.id
+        WHERE a.table_name = 'phieu_xuat'
+        ORDER BY a.changed_at DESC;
+    ";
+
+            var result = db.Database.SqlQuery<AuditLogView>(query).ToList();
+
+            return Ok(result);
+        }
+        [HttpGet]
+        [Route("api/LOG7API/GetAuditLogByTableCT")]
+        public IHttpActionResult GetAuditLogByTableCT()
+        {
+
+            var query = @"
+        SELECT 
+            a.id AS id,
+            a.table_name AS table_name,
+            a.operation AS operation,
+            a.primary_key_data AS primary_key_data,
+            a.old_data AS old_data,
+            a.new_data AS new_data,
+            a.changed_by AS changed_by,
+            a.changed_at AS changed_at,
+            b.username AS username
+        FROM audit_log a
+        LEFT JOIN userinfo b ON a.changed_by = b.id
+        WHERE a.table_name = 'ct_phieu_xuat'
+        ORDER BY a.changed_at DESC;
+    ";
+
+            var result = db.Database.SqlQuery<AuditLogView>(query).ToList();
+
+            return Ok(result);
+        }
+
 
 
     }

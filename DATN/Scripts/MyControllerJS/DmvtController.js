@@ -2,6 +2,20 @@
 
 app.controller('DmvtController', function ($scope, $http) {
     // Phần 1 khởi tạo các biến cần thiết
+    //<<<<<<<<<<<<<<<<<<<< Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
+    $scope.username = '';
+    $scope.role = '';
+
+    $http.get('/api/UserInfoAPI/GetSessionInfo')
+        .then(function (response) {
+            if (response.data.success) {
+                $scope.username = response.data.username;
+                $scope.role = response.data.role;
+            }
+        }, function (error) {
+
+        })
+    //>>>>>>>>>>>>>>>>>>>>>>Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
     ///////////////////// KHAI BÁO CÁC MẶC ĐỊNH <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     // Khởi tạo danh sách và các biến cho phiếu
     $scope.ds_main = []; 
@@ -440,5 +454,126 @@ app.controller('DmvtController', function ($scope, $http) {
         $scope.get_Dmdvt();
     };
     $scope.LoadComboBox();
+    // phần lịch sử chỉnh sửa
+    // phần lịch sử chỉnh sửa
+    $scope.isHistoryModalOpen = false;
+    $scope.historyLogs = [];
+    $scope.selectedRecord = null;
+
+    function isSameJson(jsonStr1, jsonStr2) {
+        try {
+            let obj1 = JSON.parse(jsonStr1);
+            let obj2 = JSON.parse(jsonStr2);
+            return angular.equals(obj1, obj2);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    $scope.ShowLichSu = function (item) {
+        $scope.new_item = null;
+
+        // Gọi API lấy lịch sử log
+        $http.get('/api/LOG4API/GetAuditLogByTable/')
+            .then(function (response) {
+                // Lọc bỏ các bản ghi UPDATE mà old_data và new_data giống nhau
+                $scope.historyLogs = response.data.filter(function (log) {
+                    if (log.operation === 'UPDATE') {
+                        return !isSameJson(log.old_data, log.new_data);
+                    }
+                    return true;
+                });
+                $scope.isHistoryModalOpen = true;
+            }, function (error) {
+
+            });
+    };
+    $scope.ShowLichSuCT = function (item) {
+        $http.get('/api/LOG4API/GetAuditLogByTableCT/')
+            .then(function (response) {
+                $scope.historyLogs = response.data.filter(function (log) {
+                    try {
+                        // Parse primary_key_data để lấy ma_kho
+                        const primaryKeyObj = JSON.parse(log.primary_key_data || '{}');
+                        const logMaKho = primaryKeyObj.ma_vt || null;
+
+                        // So sánh ma_kho
+                        const isSameMaKho = logMaKho === item.ma_vt;
+
+                        if (!isSameMaKho) return false;
+
+                        // Nếu là UPDATE, loại bỏ nếu old_data và new_data giống nhau
+                        if (log.operation === 'UPDATE') {
+                            return !isSameJson(log.old_data, log.new_data);
+                        }
+
+                        return true;
+                    } catch (e) {
+
+                        return false;
+                    }
+                });
+
+                $scope.isHistoryModalOpen = true;
+            }, function (error) {
+            });
+    };
+
+
+    $scope.closeHistoryModal = function () {
+        $scope.isHistoryModalOpen = false;
+        $scope.historyLogs = [];
+        $scope.selectedRecord = null;
+    };
+
+    $scope.parseJson = function (jsonString) {
+        try {
+            return JSON.parse(jsonString || "{}");
+        } catch (e) {
+            return {};
+        }
+    };
+
+    $scope.getDiffClass = function (oldValue, newValue) {
+        if (oldValue !== newValue) {
+            return "table-warning";
+        }
+        return "";
+    };
+
+    // phần lịch sử chỉnh sửa
+    $scope.uploadImage = function () {
+        var formData = new FormData();
+        formData.append("file", $scope.fileImage);
+
+        $http.post('/api/DmvtAPI/UploadImage', formData, {
+            transformRequest: angular.identity,
+            headers: { 'Content-Type': undefined }
+        }).then(function (response) {
+            if (response.data.success) {
+                $scope.new_item.url = response.data.url;
+                alert("Upload ảnh thành công");
+            } else {
+                alert("Upload thất bại");
+            }
+        }).catch(function (error) {
+            alert("Lỗi khi upload ảnh");
+        });
+    };
 
 });
+app.directive('fileModel', ['$parse', function ($parse) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            var model = $parse(attrs.fileModel);
+            var modelSetter = model.assign;
+
+            element.bind('change', function () {
+                scope.$apply(function () {
+                    modelSetter(scope, element[0].files[0]);
+                });
+            });
+        }
+    };
+}]);

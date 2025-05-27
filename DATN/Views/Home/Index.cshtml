@@ -1,37 +1,85 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@*<div class="jumbotron">
-    <h1>Home Page</h1>
-    <p class="lead">CRUD website where you can create, read, delete, update customters</p>
-    <p>This website using .NET core MVC, Entity Framework, PostgreSQL</p>
-</div>
 
-<div class="jumbotron">
-    <h1>Home Page</h1>
-    <p class="lead">CRUD website where you can create, read, delete, update customters</p>
-    <p>This website using .NET core MVC, Entity Framework, PostgreSQL</p>
-</div>
+<div class="dashboard-grid" ng-app="DashboardApp" ng-controller="DashboardController">
+    <div class="dashboard-card dashboard-primary" ng-click="onDashboardCardClick('tongNhap')">
+        <div class="dashboard-header">Tổng giá trị nhập theo ngày</div>
+        <div class="dashboard-body">
+            <canvas id="chartTongNhap"></canvas>
+        </div>
+    </div>
 
-<div class="jumbotron">
-    <h1>Home Page</h1>
-    <p class="lead">CRUD website where you can create, read, delete, update customters</p>
-    <p>This website using .NET core MVC, Entity Framework, PostgreSQL</p>
-</div><div class="jumbotron">
-    <h1>Home Page</h1>
-    <p class="lead">CRUD website where you can create, read, delete, update customters</p>
-    <p>This website using .NET core MVC, Entity Framework, PostgreSQL</p>
-</div><div class="jumbotron">
-    <h1>Home Page</h1>
-    <p class="lead">CRUD website where you can create, read, delete, update customters</p>
-    <p>This website using .NET core MVC, Entity Framework, PostgreSQL</p>
-</div><div class="jumbotron">
-    <h1>Home Page</h1>
-    <p class="lead">CRUD website where you can create, read, delete, update customters</p>
-    <p>This website using .NET core MVC, Entity Framework, PostgreSQL</p>
-</div><div class="jumbotron">
-    <h1>Home Page</h1>
-    <p class="lead">CRUD website where you can create, read, delete, update customters</p>
-    <p>This website using .NET core MVC, Entity Framework, PostgreSQL</p>
-</div>*@
+    <div class="dashboard-card dashboard-danger" ng-click="onDashboardCardClick('tongXuat')">
+        <div class="dashboard-header">Tổng giá trị xuất theo ngày</div>
+        <div class="dashboard-body">
+            <canvas id="chartTongXuat"></canvas>
+        </div>
+    </div>
+
+    <div class="dashboard-card dashboard-warning" ng-click="onDashboardCardClick('tonKho')">
+        <div class="dashboard-header">Tồn kho theo kho</div>
+        <div class="dashboard-body">
+            <canvas id="chartTonKho"></canvas>
+        </div>
+    </div>
+
+    <div class="dashboard-card dashboard-info" ng-click="onDashboardCardClick('sapHet')">
+        <div class="dashboard-header">Vật tư sắp hết hàng</div>
+        <div class="dashboard-body">
+            <canvas id="chartSapHet"></canvas>
+        </div>
+    </div>
+
+    <div class="dashboard-card dashboard-success" ng-click="onDashboardCardClick('topNCC')">
+        <div class="dashboard-header">Top 5 NCC có giá trị nhập cao nhất</div>
+        <div class="dashboard-body">
+            <canvas id="chartTopNCC"></canvas>
+        </div>
+    </div>
+
+    <!-- Nếu bạn có chart tỷ trọng loại vật tư thêm 1 card nữa -->
+    <div class="dashboard-card dashboard-secondary" ng-click="onDashboardCardClick('tyTrongLoaiVT')">
+        <div class="dashboard-header">Tỷ trọng nhập theo loại vật tư</div>
+        <div class="dashboard-body">
+            <canvas id="chartLoaiVT"></canvas>
+        </div>
+    </div>
+    <div id="modalFullscreen" class="modal-fullscreen" ng-show="modalVisible" ng-click="closeModal($event)">
+        <div class="modal-content" ng-click="$event.stopPropagation()">
+            <button class="close-btn" type="button" ng-click="closeModal($event)">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="row">
+                <div class="col-md-6">
+                    <canvas id="modalChart1"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="modalChart2"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .modal-content {
+        background: white !important;
+        padding: 20px !important;
+        border-radius: 8px !important;
+        max-width: 95% !important;
+        margin: auto !important;
+    }
+
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 20px !important;
+    }
+
+    .col-md-6 {
+        flex: 1 1 48% !important;
+    }
+</style>

@@ -36,9 +36,10 @@
                             <i class="fa fa-trash fa-lg"></i>
                         </button>
                         @* MP_NOTE  *@
-                        <button class="btn text-info" ng-click="Group()" title="Xóa">
-                            <i class="fa-solid fa-layer-group"></i>
+                        <button class="btn btn-sm btn-outline-info" ng-show="role==0" title="Lịch sử chỉnh sửa" ng-click="ShowLichSu(new_item)">
+                            <i class="fa fa-history"></i>
                         </button>
+
                     </div>
                 </div>
             </div>
@@ -98,7 +99,7 @@
                             <input type="text" class="form-control" ng-model="search.mo_ta">
                         </div>
                     </div>
-              
+
                 </div>
 
 
@@ -121,7 +122,7 @@
                         <th class="text-center align-middle">Mã kho</th>
                         <th class="text-center align-middle">Tên kho</th>
                         <th class="text-center align-middle">Địa chỉ</th>
-                        <th class="text-center align-middle">Mô tả</th> 
+                        <th class="text-center align-middle">Mô tả</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,7 +135,7 @@
                         <td class="text-center align-middle">{{ item.ten_kho }}</td>
                         <td class="text-center align-middle">{{ item.dia_chi }}</td>
                         <td class="text-center align-middle">{{ item.mo_ta }}</td>
-                       
+
                     </tr>
                 </tbody>
             </table>
@@ -168,6 +169,51 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal" ng-show="isHistoryModalOpen">
+        <div class="modal-dialog modal-lg" style="width:110%; margin: 10px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Lịch sử thay đổi: {{ new_item.ma_kho }}</h5>
+                    <button type="button" class="close" ng-click="isHistoryModalOpen = false">&times;</button>
+                </div>
+                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                    <div ng-repeat="log in historyLogs">
+                        <div class="border p-2 mb-3">
+                            <strong>Thao tác:</strong> {{ log.operation }} |
+                            <strong>Người thay đổi:</strong>{{log.changed_by}} -  {{ log.username || 'Chưa rõ' }} |
+                            <strong>Thời gian:</strong> {{ log.changed_at | date:'yyyy-MM-dd HH:mm:ss' }}
+
+                            <table class="table table-bordered table-sm mt-2">
+                                <thead>
+                                    <tr>
+                                        <th>Trường</th>
+                                        <th>Giá trị cũ</th>
+                                        <th>Giá trị mới</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                 
+                                    <tr ng-repeat="(key, newVal) in (log.operation === 'DELETE' ? parseJson(log.old_data) : parseJson(log.new_data))">
+                                        <td>{{ key }}</td>
+                                        <td ng-class="getDiffClass(parseJson(log.old_data)[key], newVal)">
+                                            {{ parseJson(log.old_data)[key] || '—' }}
+                                        </td>
+                                        <td ng-class="getDiffClass(parseJson(log.old_data)[key], newVal)">
+                                            {{ log.operation === 'DELETE' ? '—' : (newVal || '—') }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" ng-click="isHistoryModalOpen = false">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div ng-show="OtherMode">
         @*<<<<<<<phần tìm kiếm thông tin*@
         <div class="mb-3">
@@ -200,6 +246,9 @@
                         @* Hủy sự thay đổi này *@
                         <button class="btn text-info" style="color:red;" title="Đóng" ng-click="CloseOtherMode()">
                             <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" ng-show="role==0" title="Lịch sử chỉnh sửa" ng-click="ShowLichSuCT(new_item)">
+                            <i class="fa fa-history"></i>
                         </button>
                     </div>
                 </div>
@@ -244,11 +293,11 @@
         @*<<<<<<<<<<<<<<<<<<<<<<<<< PHẦN XỬ LÝ GIAO DIỆN GRID CHI TIẾT*@
 
         @* MP_NOTE sửa tiêu đề danh mục *@
-      
-    
-            @* MP_NOTE sửa tiêu đề danh mục *@
-            <p class="text-secondary" style="margin-top: 20px;  " ng-click="ExpandSearch()">Khai báo vật tư trong kho</p>
-  
+
+
+        @* MP_NOTE sửa tiêu đề danh mục *@
+        <p class="text-secondary" style="margin-top: 20px;  " ng-click="ExpandSearch()">Khai báo vật tư trong kho</p>
+
         <div class="table-responsive container mt-3">
 
 
@@ -284,14 +333,14 @@
                             <i class="fa-solid fa-xmark"></i>
                         </td>
                         <td class="text-center align-middle">
-                            <select class="form-control" ng-model="current_item.ma_vt"    ng-disabled="!edit_mode && !add_mode">
+                            <select class="form-control" ng-model="current_item.ma_vt" ng-disabled="!edit_mode && !add_mode">
                                 <option ng-repeat="item in ds_dmvt" ng-value="item.ma_vt">
                                     {{item.ma_vt}} - {{item.ten_vt}}
                                 </option>
                             </select>
                         </td>
                         <td class="text-center align-middle">
-                            <select class="form-control" ng-model="current_item.ma_dvt" ng-click="get_Dmdvt(current_item.ma_vt)"  ng-disabled="!edit_mode && !add_mode">
+                            <select class="form-control" ng-model="current_item.ma_dvt" ng-click="get_Dmdvt(current_item.ma_vt)" ng-disabled="!edit_mode && !add_mode">
                                 <option ng-repeat="item in ds_dmdvt" ng-value="item.ma_dvt">
                                     {{item.ma_dvt}} - {{item.ten_dvt}}
                                 </option>
@@ -303,17 +352,17 @@
                     </tr>
 
                     @*>>>>>>>>>> Xử lý thêm sửa dòng grid chi tiết*@
-                <tr ng-repeat="item in ds_ton_kho | filter:searchText" ng-class="{'selected-row': item.checked}"  >
-                    <td class="text-center align-middle" ng-bind="$index+1"></td>
-                    <td class="text-center align-middle" ng-click="Edit_current_item(item)"><i class="fas fa-edit" title="Sửa"></i></td>
-                    <td class="text-center align-middle" ng-click="DELETE_current_item(item)"><i class="fas fa-trash-alt text-danger" title="Xóa"></i></td>
-                    <td class="text-center align-middle">{{ item.ma_vt }}</td>
-                    <td class="text-center align-middle">{{ item.ma_dvt }}</td>
-                    <td class="text-center align-middle">{{ item.so_luong_ton }}</td>
-                  <td class="text-center align-middle">{{ item.ngay_cap_nhat | date:'dd/MM/yyyy' }}</td>
+                    <tr ng-repeat="item in ds_ton_kho | filter:searchText" ng-class="{'selected-row': item.checked}">
+                        <td class="text-center align-middle" ng-bind="$index+1"></td>
+                        <td class="text-center align-middle" ng-click="Edit_current_item(item)"><i class="fas fa-edit" title="Sửa"></i></td>
+                        <td class="text-center align-middle" ng-click="DELETE_current_item(item)"><i class="fas fa-trash-alt text-danger" title="Xóa"></i></td>
+                        <td class="text-center align-middle">{{ item.ma_vt }}</td>
+                        <td class="text-center align-middle">{{ item.ma_dvt }}</td>
+                        <td class="text-center align-middle">{{ item.so_luong_ton }}</td>
+                        <td class="text-center align-middle">{{ item.ngay_cap_nhat | date:'dd/MM/yyyy' }}</td>
 
 
-                </tr>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -325,6 +374,7 @@
         <hr />
 
     </div>
+
 
 
     @* Giao diện thêm sửa >>>> *@

@@ -1,7 +1,20 @@
 ﻿var app = angular.module('DmkhoApp', []);
-
 app.controller('DmkhoController', function ($scope, $http) {
     // Phần 1 khởi tạo các biến cần thiết
+    //<<<<<<<<<<<<<<<<<<<< Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
+    $scope.username = '';
+    $scope.role = '';
+
+    $http.get('/api/UserInfoAPI/GetSessionInfo')
+        .then(function (response) {
+            if (response.data.success) {
+                $scope.username = response.data.username;
+                $scope.role = response.data.role;
+            }
+        }, function (error) {
+
+        })
+    //>>>>>>>>>>>>>>>>>>>>>>Lấy ra các thông tin đăng nhập của người sử dụng -- mặc đinh
     ///////////////////// KHAI BÁO CÁC MẶC ĐỊNH <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     // Khởi tạo danh sách và các biến cho phiếu
     $scope.ds_main = [];
@@ -49,7 +62,7 @@ app.controller('DmkhoController', function ($scope, $http) {
         $scope.edit_mode = false;
         $scope.add_mode = true;
         $scope.OtherMode = true;  // khi thêm sẽ mở ra một màn hình khác
-
+        $scope.ds_ton_kho = [];
         // khởi tạo các giá trị mặc định trước khi thêm
         $scope.new_item = {
             role: 1 ,
@@ -409,10 +422,10 @@ app.controller('DmkhoController', function ($scope, $http) {
                 if (response.data.success) {
                      
                 } else {
-                    alert("Đã có lỗi xảy ra, liên hệ với quản trị viên");
+                   // BUG
                 }
             }, function (error) {
-                alert('Lỗi kết nối server');
+              
             });
     };
 
@@ -422,5 +435,95 @@ app.controller('DmkhoController', function ($scope, $http) {
         if ($scope.new_item) $scope.GET_tonkho($scope.new_item.ma_kho);
     };
     $scope.LoadComboBox();
+   ///
+
+   // phần lịch sử chỉnh sửa
+    // phần lịch sử chỉnh sửa
+    $scope.isHistoryModalOpen = false;
+    $scope.historyLogs = [];
+    $scope.selectedRecord = null;
+
+    function isSameJson(jsonStr1, jsonStr2) {
+        try {
+            let obj1 = JSON.parse(jsonStr1);
+            let obj2 = JSON.parse(jsonStr2);
+            return angular.equals(obj1, obj2);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    $scope.ShowLichSu = function (item) {
+        $scope.new_item = null;
+
+        // Gọi API lấy lịch sử log
+        $http.get('/api/TonKhoAPI/GetAuditLogByTable/')
+            .then(function (response) {
+                // Lọc bỏ các bản ghi UPDATE mà old_data và new_data giống nhau
+                $scope.historyLogs = response.data.filter(function (log) {
+                    if (log.operation === 'UPDATE') {
+                        return !isSameJson(log.old_data, log.new_data);
+                    }
+                    return true;
+                });
+                $scope.isHistoryModalOpen = true;
+            }, function (error) {
+                
+            });
+    };
+    $scope.ShowLichSuCT = function (item) {
+        $http.get('/api/TonKhoAPI/GetAuditLogByTableCT/')
+            .then(function (response) {
+                $scope.historyLogs = response.data.filter(function (log) {
+                    try {
+                        // Parse primary_key_data để lấy ma_kho
+                        const primaryKeyObj = JSON.parse(log.primary_key_data || '{}');
+                        const logMaKho = primaryKeyObj.ma_kho || null;
+
+                        // So sánh ma_kho
+                        const isSameMaKho = logMaKho === item.ma_kho;
+
+                        if (!isSameMaKho) return false;
+
+                        // Nếu là UPDATE, loại bỏ nếu old_data và new_data giống nhau
+                        if (log.operation === 'UPDATE') {
+                            return !isSameJson(log.old_data, log.new_data);
+                        }
+
+                        return true;
+                    } catch (e) {
+                        
+                        return false;
+                    }
+                });
+
+                $scope.isHistoryModalOpen = true;
+            }, function (error) { 
+            });
+    };
+
+
+    $scope.closeHistoryModal = function () {
+        $scope.isHistoryModalOpen = false;
+        $scope.historyLogs = [];
+        $scope.selectedRecord = null;
+    };
+
+    $scope.parseJson = function (jsonString) {
+        try {
+            return JSON.parse(jsonString || "{}");
+        } catch (e) {
+            return {};
+        }
+    };
+
+    $scope.getDiffClass = function (oldValue, newValue) {
+        if (oldValue !== newValue) {
+            return "table-warning";
+        }
+        return "";
+    };
+
+    // phần lịch sử chỉnh sửa
 
 });

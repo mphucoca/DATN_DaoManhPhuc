@@ -362,11 +362,13 @@
     <Compile Include="Controllers\BCPhieuNhapController.cs" />
     <Compile Include="Controllers\DmqddvtAPIController.cs" />
     <Compile Include="Controllers\DmqddvtController.cs" />
+    <Compile Include="Controllers\DashboardAPIController.cs" />
     <Compile Include="Controllers\LoaiVatTuAPIController.cs" />
     <Compile Include="Controllers\DMNCCAPIController.cs" />
     <Compile Include="Controllers\LoaiVatTuController.cs" />
     <Compile Include="Controllers\DMNCCController.cs" />
     <Compile Include="Controllers\LogInOutController.cs" />
+    <Compile Include="Controllers\AuditLogController.cs" />
     <Compile Include="Controllers\PhieuXuatAPIController.cs" />
     <Compile Include="Controllers\PhieuNhapAPIController.cs" />
     <Compile Include="Controllers\PhieuXuatController.cs" />
@@ -387,10 +389,12 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="DataContext\ApplicationDbContext.cs" />
+    <Compile Include="Models\AuditHelper.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\AuditLog.cs" />
     <Compile Include="Models\BCPhieuXuat.cs" />
     <Compile Include="Models\BCPhieuNhap.cs" />
     <Compile Include="Models\ChiTietPhieuNhapClass.cs" />
@@ -1214,6 +1218,7 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\MyControllerJS\BCPhieuXuatController.js" />
     <Content Include="Scripts\MyControllerJS\BCPhieuNhapController.js" />
+    <Content Include="Scripts\MyControllerJS\DashboardController.js" />
     <Content Include="Scripts\MyControllerJS\LoaiVatTuController.js" />
     <Content Include="Scripts\MyControllerJS\DMNCCController.js" />
     <Content Include="Scripts\MyControllerJS\PhieuXuatController.js" />
@@ -1286,6 +1291,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Image\" />
     <Folder Include="Report\" />
   </ItemGroup>
   <ItemGroup>

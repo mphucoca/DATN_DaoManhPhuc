@@ -36,7 +36,7 @@ namespace WH.Controllers
                     Session["UserName"] = user.username;
                     Session["Role"] = user.role;
                     Session["ID"] = user.id;
-                    Session["FullName"] = user.fullname;
+                    Session["FullName"] = user.fullname; 
                     return RedirectToAction("Index", "Home");
                 }
                 else

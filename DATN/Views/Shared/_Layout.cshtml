@@ -33,7 +33,11 @@
                                     Khai báo danh mục
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li>@Html.ActionLink("Danh mục tài khoản", "UserInfo", "UserInfo")</li>
+                                    @if (Session["Role"].ToString() == "0")
+                                    {
+                                        <li>@Html.ActionLink("Danh mục tài khoản", "UserInfo", "UserInfo")</li>
+                                    }
+
                                     <li>@Html.ActionLink("Danh mục khách hàng", "DMKhachHang", "DMKhachHang")</li>
                                     <li>@Html.ActionLink("Danh mục nhà cung cấp", "DMNCC", "DMNCC")</li>
                                     <li>@Html.ActionLink("Danh mục vật tư", "Dmvt", "Dmvt")</li>
@@ -100,9 +104,11 @@
     <script src="~/Scripts/MyControllerJS/BCTonKhoController.js"></script>
     <script src="~/Scripts/MyControllerJS/BCPhieuNhapController.js"></script>
     <script src="~/Scripts/MyControllerJS/BCPhieuXuatController.js"></script>
+    <script src="~/Scripts/MyControllerJS/DashboardController.js"></script> 
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-select/0.20.0/select.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-sanitize.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")

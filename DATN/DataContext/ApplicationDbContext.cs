@@ -26,7 +26,7 @@ namespace WH.DataContext
         public virtual DbSet<PhieuXuatClass> PhieuXuatObj { get; set; }
         public virtual DbSet<TonKhoClass> TonKhoObj { get; set; }
         public virtual DbSet<DmqddvtClass> DmqddvtObj { get; set; }
-
+        public virtual DbSet<AuditLog> AuditLogObj { get; set; }
 
 
 

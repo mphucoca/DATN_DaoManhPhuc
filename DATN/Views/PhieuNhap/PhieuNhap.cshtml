@@ -36,8 +36,9 @@
                             <i class="fa fa-trash fa-lg"></i>
                         </button>
                         @* MP_NOTE  *@
-                        <button class="btn text-info" ng-click="Group()" title="Nhóm">
-                            <i class="fa-solid fa-layer-group"></i>
+
+                        <button class="btn btn-sm btn-outline-info" ng-show="role==0" title="Lịch sử chỉnh sửa" ng-click="ShowLichSu(new_item)">
+                            <i class="fa fa-history"></i>
                         </button>
                     </div>
                 </div>
@@ -148,7 +149,50 @@
 
     </div>
 
+    <div class="modal" ng-show="isHistoryModalOpen">
+        <div class="modal-dialog modal-lg" style="width:110%; margin: 10px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Lịch sử thay đổi: {{ new_item.so_ct }}</h5>
+                    <button type="button" class="close" ng-click="isHistoryModalOpen = false">&times;</button>
+                </div>
+                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                    <div ng-repeat="log in historyLogs">
+                        <div class="border p-2 mb-3">
+                            <strong>Thao tác:</strong> {{ log.operation }} |
+                            <strong>Người thay đổi:</strong>{{log.changed_by}} -  {{ log.username || 'Chưa rõ' }} |
+                            <strong>Thời gian:</strong> {{ log.changed_at | date:'yyyy-MM-dd HH:mm:ss' }}
 
+                            <table class="table table-bordered table-sm mt-2">
+                                <thead>
+                                    <tr>
+                                        <th>Trường</th>
+                                        <th>Giá trị cũ</th>
+                                        <th>Giá trị mới</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <tr ng-repeat="(key, newVal) in (log.operation === 'DELETE' ? parseJson(log.old_data) : parseJson(log.new_data))">
+                                        <td>{{ key }}</td>
+                                        <td ng-class="getDiffClass(parseJson(log.old_data)[key], newVal)">
+                                            {{ parseJson(log.old_data)[key] || '—' }}
+                                        </td>
+                                        <td ng-class="getDiffClass(parseJson(log.old_data)[key], newVal)">
+                                            {{ log.operation === 'DELETE' ? '—' : (newVal || '—') }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" ng-click="isHistoryModalOpen = false">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     @* Giao diện thêm sửa <<<< *@
     <!-- Modal Xác Nhận -->
@@ -184,15 +228,10 @@
                     <p class="text-secondary" style="margin-top: 20px;  " ng-click="ExpandSearch()" ng-show="OtherMode">Phiếu Nhập Kho</p>
 
                 </div>
-
+               
                 <!-- Cột chứa các nút -->
-                <div class="nav navbar-nav navbar-right" style="margin: 10px;">
+                <div class="nav navbar-nav navbar-right" style="margin: 5px;">
                     <div class="action-icons">
-                        @* Reload dữ liệu *@
-                        <button class="btn text-info" ng-click="Refresh()" title="Làm mới">
-                            <i class="fa fa-refresh fa-lg"></i>
-                        </button>
-
                         <!-- Put -->
                         <button class="btn text-info" ng-click="Edit()" ng-show="!edit_mode && !add_mode" title="Sửa">
                             <i class="fa fa-pencil-square fa-lg"></i>
@@ -201,15 +240,42 @@
                         <button class="btn text-info" ng-click="Save() " ng-show="edit_mode||add_mode" title="Lưu">
                             <i class="fa-solid fa-floppy-disk"></i>
                         </button>
-                        
-                     
-                        <button class="btn text-info"  ng-click="PrintPhieuNhap( new_item.so_ct)" title="Xuất mẫu in"  ng-show="!edit_mode && !add_mode">
+
+
+                        @* Duyệt trạng thái phiếu *@
+                        <!-- Duyệt phiếu -->
+                        <button class="btn text-success" ng-click="ChangeInfo('Duyet',new_item)"
+                                title="Duyệt phiếu"
+                                ng-show="role==0&& (new_item.trang_thai== '0')">
+
+                            <i class="fa-solid fa-circle-check"></i>
+                        </button>
+
+                        <!-- Đã hoàn thành -->
+                        <button class="btn text-secondary"
+                                ng-show="role==0&& (new_item.trang_thai== '1')" ng-click="ChangeInfo('HoanThanh',new_item)"
+                                title="Phiếu đã hoàn thành">
+                            <i class="fa-solid fa-check-double"></i>
+                        </button>
+
+                        <!-- Hủy phiếu -->
+                        <button class="btn text-danger"
+                                ng-click="ChangeInfo('Huy',new_item)"
+                                ng-show="role==0&& (new_item.trang_thai== '0' ||new_item.trang_thai== '1')"
+                                title="Hủy phiếu">
+                            <i class="fa-solid fa-ban"></i>
+                        </button>
+                        @* Duyệt trạng thái phiếu *@
+                        <button class="btn text-info" ng-click="PrintPhieuNhap( new_item.so_ct)" title="Xuất mẫu in" ng-show="!edit_mode && !add_mode">
                             <i class="fa-solid fa-print"></i>
                         </button>
                         @* MP_NOTE  *@
                         @* Hủy sự thay đổi này *@
                         <button class="btn text-info" style="color:red;" ng-click="CloseOtherMode()" title="Đóng">
                             <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" ng-show="role==0" title="Lịch sử chỉnh sửa" ng-click="ShowLichSuCT(new_item)">
+                            <i class="fa fa-history"></i>
                         </button>
                     </div>
                 </div>
@@ -240,7 +306,7 @@
                         <div class="col-md-3 mb-1">
                             <div class="d-flex align-items-start">
                                 <label class="me-2" style="min-width: 100px; font-weight: normal;">Mã số thuế</label>
-                                <input type="text" class="form-control" ng-model="new_item.ma_so_thue" rows="3" ng-disabled="!edit_mode && !add_mode"> 
+                                <input type="text" class="form-control" ng-model="new_item.ma_so_thue" rows="3" ng-disabled="!edit_mode && !add_mode">
                             </div>
                         </div>
                         <div class="col-md-6 mb-2">
@@ -252,7 +318,7 @@
                         <div class="col-md-6 mb-2">
                             <div class="d-flex align-items-start">
                                 <label class="me-2" style="min-width: 100px; font-weight: normal;">Biển số xe</label>
-                                <input type="text" class="form-control" ng-model="new_item.bien_so_xe" rows="3" ng-disabled="!edit_mode && !add_mode"> 
+                                <input type="text" class="form-control" ng-model="new_item.bien_so_xe" rows="3" ng-disabled="!edit_mode && !add_mode">
                             </div>
                         </div>
                         <div class="col-md-3 mb-2">
@@ -274,7 +340,7 @@
                         <div class="col-md-3 mb-2">
                             <div class="d-flex align-items-center">
                                 <label class="me-2" style="min-width: 100px; font-weight: normal;">Chiết khấu</label>
-                                <select class="form-control" ng-model="new_item.chietkhau" ng-change="UpdateTotal()"  ng-disabled="!edit_mode && !add_mode">
+                                <select class="form-control" ng-model="new_item.chietkhau" ng-change="UpdateTotal()" ng-disabled="!edit_mode && !add_mode">
                                     <option ng-repeat="item in ds_chiet_khau" ng-value="item.ma">
                                         {{item.ma}} - {{item.ten}}
                                     </option>
@@ -294,7 +360,7 @@
                         <div class="col-md-3 mb-2">
                             <div class="d-flex align-items-center">
                                 <label class="me-2" style="min-width: 100px; font-weight: normal;">Trạng thái</label>
-                                <select class="form-control" ng-model="new_item.trang_thai" ng-disabled="!edit_mode && !add_mode">
+                                <select class="form-control" ng-model="new_item.trang_thai" disabled>
                                     <option ng-repeat="item in ds_trangthai" ng-value="item.ma_trangthai">
                                         {{item.ma_trangthai}} - {{item.ten_trangthai}}
                                     </option>
@@ -318,7 +384,7 @@
         <div class="table-responsive">
 
 
-            <table class="table table-bordered table-striped"  >
+            <table class="table table-bordered table-striped">
                 <thead class="table-light">
                     <tr>
                         @* Button thực hiện thêm mới *@
@@ -437,7 +503,7 @@
                             <strong>{{ sum.tong_thanh_toan | number:2 }}</strong>
                         </td>
                     </tr>
-                 
+
                 </tbody>
             </table>
         </div>
