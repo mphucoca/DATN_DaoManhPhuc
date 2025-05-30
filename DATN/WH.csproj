@@ -360,6 +360,8 @@
     <Compile Include="Controllers\BCPhieuNhapAPIController.cs" />
     <Compile Include="Controllers\BCPhieuXuatController.cs" />
     <Compile Include="Controllers\BCPhieuNhapController.cs" />
+    <Compile Include="Controllers\CBTonKhoAPIController.cs" />
+    <Compile Include="Controllers\CBTonKhoController.cs" />
     <Compile Include="Controllers\DmqddvtAPIController.cs" />
     <Compile Include="Controllers\DmqddvtController.cs" />
     <Compile Include="Controllers\DashboardAPIController.cs" />
@@ -1218,6 +1220,7 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\MyControllerJS\BCPhieuXuatController.js" />
     <Content Include="Scripts\MyControllerJS\BCPhieuNhapController.js" />
+    <Content Include="Scripts\MyControllerJS\CBTonKhoController.js" />
     <Content Include="Scripts\MyControllerJS\DashboardController.js" />
     <Content Include="Scripts\MyControllerJS\LoaiVatTuController.js" />
     <Content Include="Scripts\MyControllerJS\DMNCCController.js" />
@@ -1288,6 +1291,7 @@
     <Content Include="Views\PhieuXuat\PhieuXuat.cshtml" />
     <Content Include="Views\BCPhieuNhap\BCPhieuNhap.cshtml" />
     <Content Include="Views\BCPhieuXuat\BCPhieuXuat.cshtml" />
+    <Content Include="Views\CBTonKho\CBTonKho.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

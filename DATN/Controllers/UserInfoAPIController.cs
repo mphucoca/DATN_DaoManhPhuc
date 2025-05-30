@@ -160,6 +160,7 @@ namespace WH.Controllers
                     .FirstOrDefault();
 
                 userInfo.id = lastUser == null ? "0" : (int.Parse(lastUser) + 1).ToString();
+                userInfo.password = PasswordHelper.HashPassword(userInfo.password);
                 db.UserInfoObj.Add(userInfo);
                 await db.SaveChangesAsync();
 
@@ -224,7 +225,10 @@ namespace WH.Controllers
                 // Cập nhật thông tin
                 existingUser.username = userInfo.username;
                 existingUser.fullname = userInfo.fullname;
-                existingUser.password = userInfo.password;
+                if (existingUser.password != userInfo.password)
+                {
+                    existingUser.password = PasswordHelper.HashPassword(userInfo.password);
+                }
                 existingUser.email = userInfo.email;
                 existingUser.role = userInfo.role;
                 existingUser.trangthai = userInfo.trangthai;
@@ -255,7 +259,58 @@ namespace WH.Controllers
         }
 
 
+        [HttpGet]
+        [Route("api/UserAPI/GetAuditLogByTable")]
+        public IHttpActionResult GetAuditLogByTable()
+        {
 
+            var query = @"
+        SELECT 
+            a.id AS id,
+            a.table_name AS table_name,
+            a.operation AS operation,
+            a.primary_key_data AS primary_key_data,
+            a.old_data AS old_data,
+            a.new_data AS new_data,
+            a.changed_by AS changed_by,
+            a.changed_at AS changed_at,
+            b.username AS username
+        FROM audit_log a
+        LEFT JOIN userinfo b ON a.changed_by = b.id
+        WHERE a.table_name = 'userinfo'
+        ORDER BY a.changed_at DESC;
+    ";
+
+            var result = db.Database.SqlQuery<AuditLogView>(query).ToList();
+
+            return Ok(result);
+        }
+        [HttpGet]
+        [Route("api/UserAPI/GetAuditLogByTableCT")]
+        public IHttpActionResult GetAuditLogByTableCT()
+        {
+
+            var query = @"
+        SELECT 
+            a.id AS id,
+            a.table_name AS table_name,
+            a.operation AS operation,
+            a.primary_key_data AS primary_key_data,
+            a.old_data AS old_data,
+            a.new_data AS new_data,
+            a.changed_by AS changed_by,
+            a.changed_at AS changed_at,
+            b.username AS username
+        FROM audit_log a
+        LEFT JOIN userinfo b ON a.changed_by = b.id
+        WHERE a.table_name = 'userinfo'
+        ORDER BY a.changed_at DESC;
+    ";
+
+            var result = db.Database.SqlQuery<AuditLogView>(query).ToList();
+
+            return Ok(result);
+        }
 
 
     }

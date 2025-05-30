@@ -28,8 +28,10 @@ namespace WH.Controllers
             if (Session["UserName"] != null) return RedirectToAction("Index", "Home") ;
             if (ModelState.IsValid)
             {
+                string hashedPassword = PasswordHelper.HashPassword(password);
+
                 var user = db.UserInfoObj
-                            .FirstOrDefault(u => u.username == username && u.password == password);
+                            .FirstOrDefault(u => u.username == username && u.password == hashedPassword);
 
                 if (user != null)
                 {
@@ -94,14 +96,34 @@ namespace WH.Controllers
 
             return View(userInfo);
         }
-     
 
+ 
         // GET: LogInOut/Logout
         public ActionResult Logout()
         {
-            Session["UserName"] = null;
-            Session["FullName"] = null;
-            return RedirectToAction("Login");
+            // Xoá mọi Session
+            Session.Clear();
+            Session.Abandon();
+
+            // Xoá cookie FormsAuthentication
+            FormsAuthentication.SignOut();
+
+            // Xoá toàn bộ cookie còn tồn tại
+            if (Request.Cookies != null)
+            {
+                foreach (string cookieName in Request.Cookies.AllKeys)
+                {
+                    var cookie = new HttpCookie(cookieName)
+                    {
+                        Expires = DateTime.Now.AddDays(-1),
+                        Value = null
+                    };
+                    Response.Cookies.Add(cookie);
+                }
+            }
+
+            return RedirectToAction("Login", "LogInOut");
         }
+
     }
 }

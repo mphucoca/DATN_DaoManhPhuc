@@ -11,6 +11,9 @@ namespace WH.Controllers
         // GET: PhieuNhap
         public ActionResult PhieuNhap()
         {
+            if (Session["UserName"] == null)
+                return RedirectToAction("Login", "LogInOut");
+
             return View();
         }
     }

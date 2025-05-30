@@ -244,4 +244,92 @@ app.controller('UserInfoController', function ($scope, $http) {
         $scope.OtherMode = true;
     }
 
+    // phần lịch sử chỉnh sửa
+    // phần lịch sử chỉnh sửa
+    $scope.isHistoryModalOpen = false;
+    $scope.historyLogs = [];
+    $scope.selectedRecord = null;
+
+    function isSameJson(jsonStr1, jsonStr2) {
+        try {
+            let obj1 = JSON.parse(jsonStr1);
+            let obj2 = JSON.parse(jsonStr2);
+            return angular.equals(obj1, obj2);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    $scope.ShowLichSu = function (item) {
+        $scope.new_item = null;
+
+        // Gọi API lấy lịch sử log
+        $http.get('/api/UserAPI/GetAuditLogByTable/')
+            .then(function (response) {
+                // Lọc bỏ các bản ghi UPDATE mà old_data và new_data giống nhau
+                $scope.historyLogs = response.data.filter(function (log) {
+                    if (log.operation === 'UPDATE') {
+                        return !isSameJson(log.old_data, log.new_data);
+                    }
+                    return true;
+                });
+                $scope.isHistoryModalOpen = true;
+            }, function (error) {
+
+            });
+    };
+    $scope.ShowLichSuCT = function (item) {
+        $http.get('/api/UserAPI/GetAuditLogByTableCT/')
+            .then(function (response) {
+                $scope.historyLogs = response.data.filter(function (log) {
+                    try {
+                        // Parse primary_key_data để lấy ma_kho
+                        const primaryKeyObj = JSON.parse(log.primary_key_data || '{}');
+                        const logMaKho = primaryKeyObj.id || null;
+
+                        // So sánh ma_kho
+                        const isSameMaKho = logMaKho === item.id;
+
+                        if (!isSameMaKho) return false;
+
+                        // Nếu là UPDATE, loại bỏ nếu old_data và new_data giống nhau
+                        if (log.operation === 'UPDATE') {
+                            return !isSameJson(log.old_data, log.new_data);
+                        }
+
+                        return true;
+                    } catch (e) {
+
+                        return false;
+                    }
+                });
+
+                $scope.isHistoryModalOpen = true;
+            }, function (error) {
+            });
+    };
+
+
+    $scope.closeHistoryModal = function () {
+        $scope.isHistoryModalOpen = false;
+        $scope.historyLogs = [];
+        $scope.selectedRecord = null;
+    };
+
+    $scope.parseJson = function (jsonString) {
+        try {
+            return JSON.parse(jsonString || "{}");
+        } catch (e) {
+            return {};
+        }
+    };
+
+    $scope.getDiffClass = function (oldValue, newValue) {
+        if (oldValue !== newValue) {
+            return "table-warning";
+        }
+        return "";
+    };
+
+    // phần lịch sử chỉnh sửa
 });

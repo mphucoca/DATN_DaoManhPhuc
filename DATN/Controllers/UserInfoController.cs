@@ -18,7 +18,7 @@ namespace WH.Controllers
         // GET: UserInfo
         public ActionResult UserInfo()
         {
-            if (Session["UserName"] == null || (int)Session["Role"] != 0)
+            if (Session["UserName"] == null )
                 return RedirectToAction("Login", "LogInOut");
 
             ViewBag.Total = db.UserInfoObj.Count();

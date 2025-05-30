@@ -137,8 +137,13 @@
                         <td class="text-center align-middle">{{ item.ngay_ct | date:'dd/MM/yyyy' }}</td>
                         <td class="text-center align-middle">{{ item.dien_giai }}</td>
                         <td class="text-center align-middle">
-                            <span ng-if="item.TrangThai == 1" class="text-success">Đã duyệt</span>
-                            <span ng-if="item.TrangThai != 1" class="text-warning">Chưa duyệt</span>
+                            <span ng-switch="item.trang_thai">
+                                <span ng-switch-when="0" class="text-primary">Chờ duyệt</span>
+                                <span ng-switch-when="1" class="text-success">Đã duyệt</span>
+                                <span ng-switch-when="2" class="text-info">Đã hoàn thành</span>
+                                <span ng-switch-when="3" class="text-danger">Đã hủy</span>
+                                <span ng-switch-default class="text-muted">Không rõ</span>
+                            </span>
                         </td>
                     </tr>
                 </tbody>
@@ -247,14 +252,14 @@
                         <!-- Duyệt phiếu -->
                         <button class="btn text-success" ng-click="ChangeInfo('Duyet',new_item)"
                                 title="Duyệt phiếu"
-                                ng-show="role==0&& (new_item.trang_thai== '0')">
+                                ng-show="role==0&& (new_item.trang_thai== '0')&&!edit_mode && !add_mode">
 
                             <i class="fa-solid fa-circle-check"></i>
                         </button>
 
                         <!-- Đã hoàn thành -->
                         <button class="btn text-secondary"
-                                ng-show="role==0&& (new_item.trang_thai== '1')" ng-click="ChangeInfo('HoanThanh',new_item)"
+                                ng-show="role==0&& (new_item.trang_thai== '1')&&!edit_mode && !add_mode" ng-click="ChangeInfo('HoanThanh',new_item)"
                                 title="Phiếu đã hoàn thành">
                             <i class="fa-solid fa-check-double"></i>
                         </button>
@@ -262,7 +267,7 @@
                         <!-- Hủy phiếu -->
                         <button class="btn text-danger"
                                 ng-click="ChangeInfo('Huy',new_item)"
-                                ng-show="role==0&& (new_item.trang_thai== '0' ||new_item.trang_thai== '1')"
+                                ng-show="role==0&& (new_item.trang_thai== '0' ||new_item.trang_thai== '1')&&!edit_mode && !add_mode"
                                 title="Hủy phiếu">
                             <i class="fa-solid fa-ban"></i>
                         </button>

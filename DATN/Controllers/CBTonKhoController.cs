@@ -11,12 +11,12 @@ using WH.Models;
 using ApplicationDbContext = WH.DataContext.ApplicationDbContext;
 namespace WH.Controllers
 {
-    public class BCPhieuXuatController : Controller
+    public class CBTonKhoController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: BCTonKho
-        public ActionResult BCPhieuXuat()
+        public ActionResult CBTonKho()
         {
             if (Session["UserName"] == null)
                 return RedirectToAction("Login", "LogInOut");

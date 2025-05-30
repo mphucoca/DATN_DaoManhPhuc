@@ -18,8 +18,9 @@ namespace WH.Controllers
         // GET: Dmvt
         public ActionResult Dmvt()
         {
-            if (Session["UserName"] == null || (int)Session["Role"] != 0)
-                return RedirectToAction("Login", "LogInOut"); 
+            if (Session["UserName"] == null)
+                return RedirectToAction("Login", "LogInOut");
+
             return View();
         }
 

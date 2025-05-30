@@ -18,8 +18,9 @@ namespace WH.Controllers
         // GET: DMNCC
         public ActionResult DMNCC()
         {
-            if (Session["UserName"] == null || (int)Session["Role"] != 0)
+            if (Session["UserName"] == null)
                 return RedirectToAction("Login", "LogInOut");
+
             return View();
         }
  

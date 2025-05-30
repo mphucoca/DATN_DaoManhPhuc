@@ -18,8 +18,9 @@ namespace WH.Controllers
         // GET: LoaiVatTu
         public ActionResult LoaiVatTu()
         {
-            if (Session["UserName"] == null || (int)Session["Role"] != 0)
+            if (Session["UserName"] == null)
                 return RedirectToAction("Login", "LogInOut");
+
             return View();
         }
  
